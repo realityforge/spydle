@@ -10,6 +10,7 @@ repositories:
     username: upload
 
 artifacts:
+  javax_annotation: com.google.code.findbugs:jsr305:jar:1.3.9
   #
   # Mocking library
   mockito: org.mockito:mockito-all:jar:1.8.5
