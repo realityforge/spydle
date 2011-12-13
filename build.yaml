@@ -1,0 +1,15 @@
+gems:
+  - buildr = 1.4.6
+
+repositories:
+  remote:
+   - http://repo.fire.dse.vic.gov.au/content/groups/fisg
+   - http://www.ibiblio.org/maven2
+  release_to:
+    url: http://repo.fire.dse.vic.gov.au/content/repositories/releases/
+    username: upload
+
+artifacts:
+  #
+  # Mocking library
+  mockito: org.mockito:mockito-all:jar:1.8.5
