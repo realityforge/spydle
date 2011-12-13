@@ -59,15 +59,15 @@ public class ServiceDescriptor
 
   public String getURL()
   {
-    return "service:jmx:rmi:///jndi/rmi://" + _host + ":" + _port + "/jmxrmi";
+    return "service:jmx:rmi:///jndi/rmi://" + getHost() + ":" + getPort() + "/jmxrmi";
   }
 
   public Map<String, ?> getEnvironment()
   {
     final Map<String, String[]> environment = new HashMap<String, String[]>();
-    if( null != _username && null != _password )
+    if( null != getUsername() && null != getPassword() )
     {
-      environment.put( JMXConnector.CREDENTIALS, new String[]{ _username, _password } );
+      environment.put( JMXConnector.CREDENTIALS, new String[]{ getUsername(), getPassword() } );
     }
     return environment;
   }
