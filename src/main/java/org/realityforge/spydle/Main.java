@@ -1,10 +1,9 @@
 package org.realityforge.spydle;
 
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.Nullable;
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
@@ -44,24 +43,24 @@ public class Main
     {
       //Ignored
     }
+    final Set<ObjectName> objectNames = mBeanServer.queryNames( objectName, null );
     final InetSocketAddress socketAddress = new InetSocketAddress( "192.168.0.11", 2003 );
     for( int i = 0; i < 10000000; i++ )
     {
-      final Socket socket = new Socket();
-      socket.connect( socketAddress );
-      final OutputStream outputStream = socket.getOutputStream();
+      final MetricHandler handler = new GraphiteMetricHandler( socketAddress, "PD42.SS" );
+      handler.open();
       for( final MBeanAttributeInfo attribute : attributes )
       {
-        final Object value = mBeanServer.getAttribute( objectName, attribute.getName() );
+        final String key = attribute.getName();
+        final String attributeName = attribute.getName();
+        final Object value = mBeanServer.getAttribute( objectName, attributeName );
         if( value instanceof Number )
         {
-          final long time = System.currentTimeMillis() / 1000;
-          final String line = "PD42.SS." + attribute.getName() + " " + value + " " + time + "\n";
-          outputStream.write( line.getBytes( "US-ASCII" ) );
+          handler.metric( key, System.currentTimeMillis(), ( (Number) value ).longValue() );
         }
       }
+      handler.close();
       System.out.println( "." );
-      socket.close();
       Thread.sleep( 1000 );
     }
 
