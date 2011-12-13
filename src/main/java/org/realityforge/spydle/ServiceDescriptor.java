@@ -11,7 +11,6 @@ import javax.management.remote.JMXConnector;
  */
 public class ServiceDescriptor
 {
-  @Nonnull
   private final String _host;
   private final int _port;
   @Nullable
