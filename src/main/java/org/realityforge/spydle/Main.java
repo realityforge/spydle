@@ -1,10 +1,8 @@
 package org.realityforge.spydle;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nullable;
 import javax.management.AttributeNotFoundException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -20,9 +18,7 @@ public class Main
     throws Exception
 
   {
-    final JMXServiceURL url =
-      new JMXServiceURL( "service:jmx:rmi:///jndi/rmi://127.0.0.1:1105/jmxrmi" );
-    final JMXConnector connector = JMXConnectorFactory.connect( url, getEnvironment( null, null ) );
+    final JMXConnector connector = initConnector( new ServiceDescriptor( "127.0.0.1", 1105 ) );
 
     final MBeanServerConnection mBeanServer = connector.getMBeanServerConnection();
     final ObjectName objectName = new ObjectName( "java.lang:type=OperatingSystem" );
@@ -67,14 +63,10 @@ public class Main
     connector.close();
   }
 
-  private static Map<String, String[]> getEnvironment( @Nullable final String username,
-                                                       @Nullable final String password )
+  private static JMXConnector initConnector( final ServiceDescriptor service )
+    throws IOException
   {
-    final Map<String, String[]> environment = new HashMap<String, String[]>();
-    if( null != username && null != password )
-    {
-      environment.put( JMXConnector.CREDENTIALS, new String[]{ username, password } );
-    }
-    return environment;
+    final JMXServiceURL url = new JMXServiceURL( service.getURL() );
+    return JMXConnectorFactory.connect( url, service.getEnvironment() );
   }
 }
