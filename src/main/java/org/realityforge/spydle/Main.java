@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
@@ -17,7 +18,7 @@ public class Main
 
   public static final ServiceDescriptor SERVICE = new ServiceDescriptor( "127.0.0.1", 1105 );
   public static final InetSocketAddress GRAPHITE_ADDRESS =
-    new InetSocketAddress( "192.168.0.14", 2003 );
+    new InetSocketAddress( "192.168.0.10", 2003 );
   public static final String GLOBAL_PREFIX = "PD42.SS";
 
   public static void main( final String[] args )
@@ -30,17 +31,38 @@ public class Main
 
     final QueryDescriptor query1 =
       new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           "OperatingSystem",
-                           null );
+                           null,
+                           "Service1" );
     final HashSet<String> attributeNames = new HashSet<String>();
     attributeNames.add( "FreePhysicalMemorySize" );
     final QueryDescriptor query2 =
       new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           "OperatingSystem2",
-                           attributeNames );
+                           attributeNames,
+                           "Service2" );
+    final ArrayList<String> nameComponents = new ArrayList<String>();
+    nameComponents.add( "type" );
+    nameComponents.add( QueryDescriptor.ATTRIBUTE_COMPONENT );
+    nameComponents.add( QueryDescriptor.DOMAIN_COMPONENT );
+    final QueryDescriptor query3 =
+      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+                           attributeNames,
+                           "Service3",
+                           nameComponents );
+    final QueryDescriptor query4 =
+      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+                           attributeNames,
+                           "Service4",
+                           new ArrayList<String>() );
+    final QueryDescriptor query5 =
+      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+                           null,
+                           null );
     final ArrayList<QueryDescriptor> queries = new ArrayList<QueryDescriptor>();
     queries.add( query1 );
     queries.add( query2 );
+    queries.add( query3 );
+    queries.add( query4 );
+    queries.add( query5 );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -63,18 +85,22 @@ public class Main
                                            final QueryDescriptor query )
     throws Exception
   {
-    final MBeanInfo info = mBeanServer.getMBeanInfo( query.getObjectName() );
+    final ObjectName objectName = query.getObjectName();
+    final MBeanInfo info = mBeanServer.getMBeanInfo( objectName );
     for( final MBeanAttributeInfo attribute : info.getAttributes() )
     {
       final String attributeName = attribute.getName();
-      if( query.getAttributeNames().contains( attributeName ) ||
-          0 == query.getAttributeNames().size() )
+      final Set<String> attributeNames = query.getAttributeNames();
+      if( null == attributeNames ||
+          attributeNames.contains( attributeName ) )
       {
-        final String key = query.getMetricPrefix() + "." + attribute.getName();
-        final Object value = mBeanServer.getAttribute( query.getObjectName(), attributeName );
+        final Object value = mBeanServer.getAttribute( objectName, attributeName );
         if( value instanceof Number )
         {
-          handler.metric( key, System.currentTimeMillis(), ( (Number) value ).longValue() );
+          final String key = query.generateKey( objectName, attributeName );
+          final long numericValue = ( (Number) value ).longValue();
+          System.out.println( key + " = " + numericValue );
+          handler.metric( key, System.currentTimeMillis(), numericValue );
         }
       }
     }
