@@ -57,12 +57,17 @@ public class Main
       new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
                            null,
                            null );
+    final QueryDescriptor query6 =
+      new QueryDescriptor( new ObjectName( "java.lang:type=*" ),
+                           null,
+                           null );
     final ArrayList<QueryDescriptor> queries = new ArrayList<QueryDescriptor>();
     queries.add( query1 );
     queries.add( query2 );
     queries.add( query3 );
     queries.add( query4 );
     queries.add( query5 );
+    queries.add( query6 );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -86,6 +91,26 @@ public class Main
     throws Exception
   {
     final ObjectName objectName = query.getObjectName();
+    if( objectName.isPattern() )
+    {
+      final Set<ObjectName> objectNames = mBeanServer.queryNames( objectName, null );
+      for( final ObjectName candidate : objectNames )
+      {
+        collectQueryResults( mBeanServer, handler, query, candidate );
+      }
+    }
+    else
+    {
+      collectQueryResults( mBeanServer, handler, query, objectName );
+    }
+  }
+
+  private static void collectQueryResults( final MBeanServerConnection mBeanServer,
+                                           final MetricHandler handler,
+                                           final QueryDescriptor query,
+                                           final ObjectName objectName )
+    throws Exception
+  {
     final MBeanInfo info = mBeanServer.getMBeanInfo( objectName );
     for( final MBeanAttributeInfo attribute : info.getAttributes() )
     {
