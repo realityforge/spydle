@@ -71,7 +71,9 @@ public class Main
 
     for( int i = 0; i < 10000000; i++ )
     {
-      final MetricHandler handler = new GraphiteMetricHandler( GRAPHITE_ADDRESS, GLOBAL_PREFIX );
+      final MetricHandler handler =
+        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( GRAPHITE_ADDRESS, GLOBAL_PREFIX ),
+                                                    new PrintStreamMetricHandler() } );
       handler.open();
       for( final QueryDescriptor query : queries )
       {
@@ -123,9 +125,7 @@ public class Main
         if( value instanceof Number )
         {
           final String key = query.generateKey( objectName, attributeName );
-          final long numericValue = ( (Number) value ).longValue();
-          System.out.println( key + " = " + numericValue );
-          handler.metric( key, System.currentTimeMillis(), numericValue );
+          handler.metric( key, System.currentTimeMillis(), ( (Number) value ).longValue() );
         }
       }
     }
