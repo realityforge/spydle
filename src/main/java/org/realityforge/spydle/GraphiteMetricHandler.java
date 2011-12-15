@@ -25,7 +25,6 @@ public final class GraphiteMetricHandler
   public void metric( final String key, final long timeInMillis, final long value )
     throws IOException
   {
-    final long time = timeInMillis / 1000;
     final StringBuilder sb = new StringBuilder();
     if( null != _prefix )
     {
@@ -39,9 +38,14 @@ public final class GraphiteMetricHandler
     sb.append( ' ' );
     sb.append( value );
     sb.append( ' ' );
-    sb.append( time );
+    sb.append( toUnixEpoch( timeInMillis ) );
     sb.append( '\n' );
     _outputStream.write( sb.toString().getBytes( "US-ASCII" ) );
+  }
+
+  private long toUnixEpoch( final long timeInMillis )
+  {
+    return timeInMillis / 1000;
   }
 
   public void open()
