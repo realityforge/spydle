@@ -8,12 +8,12 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 
-public class ServiceEntry
+public class JmxService
 {
   private final JmxServiceDescriptor _descriptor;
   private JMXConnector _connector;
 
-  public ServiceEntry( @Nonnull final JmxServiceDescriptor descriptor )
+  public JmxService( @Nonnull final JmxServiceDescriptor descriptor )
   {
     _descriptor = descriptor;
   }

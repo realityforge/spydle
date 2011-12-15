@@ -25,7 +25,7 @@ public class Main
     final GraphiteServiceDescriptor descriptor =
       new GraphiteServiceDescriptor( GRAPHITE_ADDRESS, "PD42.SS" );
     final JmxTaskDescriptor task = defineJobDescriptor();
-    final ServiceEntry serviceEntry = new ServiceEntry( task.getService() );
+    final JmxService jmxService = new JmxService( task.getService() );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -35,13 +35,13 @@ public class Main
       handler.open();
       for( final Query query : task.getQueries() )
       {
-        collectQueryResults( serviceEntry.acquireConnection(), handler, query );
+        collectQueryResults( jmxService.acquireConnection(), handler, query );
       }
       handler.close();
       Thread.sleep( task.getDelay() );
     }
 
-    serviceEntry.close();
+    jmxService.close();
   }
 
   private static JmxTaskDescriptor defineJobDescriptor()
