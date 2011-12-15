@@ -2,8 +2,8 @@ package org.realityforge.spydle;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
+import javax.annotation.Nonnull;
 
 /**
  * A simple handler that writes to graphite.
@@ -11,24 +11,22 @@ import java.net.Socket;
 public final class GraphiteMetricHandler
   implements MetricHandler
 {
-  private final String _prefix;
-  private final InetSocketAddress _socketAddress;
+  private final GraphiteServerDescriptor _descriptor;
   private OutputStream _outputStream;
 
-  public GraphiteMetricHandler( final InetSocketAddress socketAddress,
-                                final String prefix )
+  public GraphiteMetricHandler( @Nonnull final GraphiteServerDescriptor descriptor )
   {
-    _socketAddress = socketAddress;
-    _prefix = prefix;
+    _descriptor = descriptor;
   }
 
   public void metric( final String key, final long timeInMillis, final long value )
     throws IOException
   {
     final StringBuilder sb = new StringBuilder();
-    if( null != _prefix )
+    final String prefix = _descriptor.getPrefix();
+    if( null != prefix )
     {
-      sb.append( _prefix );
+      sb.append( prefix );
       if( sb.length() > 0 )
       {
         sb.append( '.' );
@@ -52,7 +50,7 @@ public final class GraphiteMetricHandler
     throws IOException
   {
     final Socket socket = new Socket();
-    socket.connect( _socketAddress );
+    socket.connect( _descriptor.getSocketAddress() );
     _outputStream = socket.getOutputStream();
   }
 

@@ -13,20 +13,20 @@ import javax.management.ObjectName;
 public class Main
 {
 
-  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.16", 2003 );
-  public static final String GLOBAL_PREFIX = "PD42.SS";
+  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.14", 2003 );
 
   public static void main( final String[] args )
     throws Exception
-
   {
+    final GraphiteServerDescriptor graphiteServer =
+      new GraphiteServerDescriptor( GRAPHITE_ADDRESS, "PD42.SS" );
     final JobDescriptor job = defineJobDescriptor();
     final ServiceEntry serviceEntry = new ServiceEntry( job.getService() );
 
     for( int i = 0; i < 10000000; i++ )
     {
       final MetricHandler handler =
-        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( GRAPHITE_ADDRESS, GLOBAL_PREFIX ),
+        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteServer ),
                                                     new PrintStreamMetricHandler() } );
       handler.open();
       for( final QueryDescriptor query : job.getQueries() )
@@ -34,7 +34,6 @@ public class Main
         collectQueryResults( serviceEntry.acquireConnection(), handler, query );
       }
       handler.close();
-      System.out.println( "." );
       Thread.sleep( job.getDelay() );
     }
 
