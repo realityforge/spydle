@@ -13,6 +13,7 @@ import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.descriptors.jmx.Query;
+import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jmx.JmxService;
 
@@ -130,10 +131,11 @@ public class Main
         if( value instanceof Number )
         {
           final String key = query.generateKey( objectName, attributeName );
-          handler.metric( key, System.currentTimeMillis(), ( (Number) value ).longValue() );
+          final MetricValue metricValue =
+            new MetricValue( key, ( (Number) value ).longValue(), System.currentTimeMillis() );
+          handler.metric( metricValue );
         }
       }
     }
   }
-
 }

@@ -2,6 +2,7 @@ package org.realityforge.spydle;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
+import org.realityforge.spydle.runtime.MetricValue;
 
 public final class MultiMetricWriter
   implements MetricHandler
@@ -13,12 +14,12 @@ public final class MultiMetricWriter
     _handlers = handlers;
   }
 
-  public void metric( final String key, final long timeInMillis, final long value )
+  public void metric( final MetricValue metric )
     throws IOException
   {
     for( final MetricHandler handler : _handlers )
     {
-      handler.metric( key, timeInMillis, value );
+      handler.metric( metric );
     }
   }
 }
