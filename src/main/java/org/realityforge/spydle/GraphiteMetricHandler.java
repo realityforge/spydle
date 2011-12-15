@@ -2,6 +2,7 @@ package org.realityforge.spydle;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;
+import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 
 /**
@@ -17,7 +18,7 @@ public final class GraphiteMetricHandler
     _graphiteService = graphiteService;
   }
 
-  public void metric( final String key, final long timeInMillis, final long value )
+  public void metric( final MetricValue metric )
     throws IOException
   {
     final StringBuilder sb = new StringBuilder();
@@ -30,11 +31,11 @@ public final class GraphiteMetricHandler
         sb.append( '.' );
       }
     }
-    sb.append( key );
+    sb.append( metric.getKey() );
     sb.append( ' ' );
-    sb.append( value );
+    sb.append( metric.getValue() );
     sb.append( ' ' );
-    sb.append( toUnixEpoch( timeInMillis ) );
+    sb.append( toUnixEpoch( metric.getCollectedAt() ) );
     sb.append( '\n' );
     _graphiteService.acquireConnection().write( sb.toString().getBytes( "US-ASCII" ) );
   }
