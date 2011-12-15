@@ -1,10 +1,8 @@
 package org.realityforge.spydle;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
+import org.realityforge.spydle.runtime.graphite.GraphiteService;
 
 /**
  * A simple handler that writes to graphite.
@@ -12,19 +10,18 @@ import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 public final class GraphiteMetricHandler
   implements MetricHandler
 {
-  private final GraphiteServiceDescriptor _descriptor;
-  private OutputStream _outputStream;
+  private final GraphiteService _graphiteService;
 
-  public GraphiteMetricHandler( @Nonnull final GraphiteServiceDescriptor descriptor )
+  public GraphiteMetricHandler( @Nonnull final GraphiteService graphiteService )
   {
-    _descriptor = descriptor;
+    _graphiteService = graphiteService;
   }
 
   public void metric( final String key, final long timeInMillis, final long value )
     throws IOException
   {
     final StringBuilder sb = new StringBuilder();
-    final String prefix = _descriptor.getPrefix();
+    final String prefix = _graphiteService.getDescriptor().getPrefix();
     if( null != prefix )
     {
       sb.append( prefix );
@@ -39,7 +36,7 @@ public final class GraphiteMetricHandler
     sb.append( ' ' );
     sb.append( toUnixEpoch( timeInMillis ) );
     sb.append( '\n' );
-    _outputStream.write( sb.toString().getBytes( "US-ASCII" ) );
+    _graphiteService.acquireConnection().write( sb.toString().getBytes( "US-ASCII" ) );
   }
 
   private long toUnixEpoch( final long timeInMillis )
@@ -48,20 +45,10 @@ public final class GraphiteMetricHandler
   }
 
   public void open()
-    throws IOException
   {
-    final Socket socket = new Socket();
-    socket.connect( _descriptor.getSocketAddress() );
-    _outputStream = socket.getOutputStream();
   }
 
   public void close()
-    throws IOException
   {
-    if( null != _outputStream )
-    {
-      _outputStream.close();
-      _outputStream = null;
-    }
   }
 }

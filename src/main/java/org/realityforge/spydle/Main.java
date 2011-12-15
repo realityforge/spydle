@@ -10,9 +10,10 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
+import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.descriptors.jmx.Query;
-import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
+import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jmx.JmxService;
 
 public class Main
@@ -23,15 +24,15 @@ public class Main
   public static void main( final String[] args )
     throws Exception
   {
-    final GraphiteServiceDescriptor descriptor =
-      new GraphiteServiceDescriptor( GRAPHITE_ADDRESS, "PD42.SS" );
+    final GraphiteService graphiteService =
+      new GraphiteService( new GraphiteServiceDescriptor( GRAPHITE_ADDRESS, "PD42.SS" ) );
     final JmxTaskDescriptor task = defineJobDescriptor();
     final JmxService jmxService = new JmxService( task.getService() );
 
     for( int i = 0; i < 10000000; i++ )
     {
       final MetricHandler handler =
-        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( descriptor ),
+        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteService ),
                                                     new PrintStreamMetricHandler() } );
       handler.open();
       for( final Query query : task.getQueries() )
@@ -41,7 +42,7 @@ public class Main
       handler.close();
       Thread.sleep( task.getDelay() );
     }
-
+    graphiteService.close();
     jmxService.close();
   }
 
@@ -50,36 +51,36 @@ public class Main
   {
     final Query query1 =
       new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           null,
-                           "Service1" );
+                 null,
+                 "Service1" );
     final HashSet<String> attributeNames = new HashSet<String>();
     attributeNames.add( "FreePhysicalMemorySize" );
     final Query query2 =
       new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           attributeNames,
-                           "Service2" );
+                 attributeNames,
+                 "Service2" );
     final ArrayList<String> nameComponents = new ArrayList<String>();
     nameComponents.add( "type" );
     nameComponents.add( Query.ATTRIBUTE_COMPONENT );
     nameComponents.add( Query.DOMAIN_COMPONENT );
     final Query query3 =
       new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           attributeNames,
-                           "Service3",
-                           nameComponents );
+                 attributeNames,
+                 "Service3",
+                 nameComponents );
     final Query query4 =
       new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           attributeNames,
-                           "Service4",
-                           new ArrayList<String>() );
+                 attributeNames,
+                 "Service4",
+                 new ArrayList<String>() );
     final Query query5 =
       new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
-                           null,
-                           null );
+                 null,
+                 null );
     final Query query6 =
       new Query( new ObjectName( "java.lang:type=*" ),
-                           null,
-                           null );
+                 null,
+                 null );
     final ArrayList<Query> queries = new ArrayList<Query>();
     queries.add( query1 );
     queries.add( query2 );
