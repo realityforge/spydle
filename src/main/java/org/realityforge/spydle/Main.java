@@ -1,6 +1,5 @@
 package org.realityforge.spydle;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,14 +9,11 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
 public class Main
 {
 
-  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.14", 2003 );
+  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.16", 2003 );
   public static final String GLOBAL_PREFIX = "PD42.SS";
 
   public static void main( final String[] args )
@@ -25,9 +21,7 @@ public class Main
 
   {
     final JobDescriptor job = defineJobDescriptor();
-
-    final JMXConnector connector = initConnector( job.getService() );
-    final MBeanServerConnection mBeanServer = connector.getMBeanServerConnection();
+    final ServiceEntry serviceEntry = new ServiceEntry( job.getService() );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -37,14 +31,14 @@ public class Main
       handler.open();
       for( final QueryDescriptor query : job.getQueries() )
       {
-        collectQueryResults( mBeanServer, handler, query );
+        collectQueryResults( serviceEntry.acquireConnection(), handler, query );
       }
       handler.close();
       System.out.println( "." );
       Thread.sleep( job.getDelay() );
     }
 
-    connector.close();
+    serviceEntry.close();
   }
 
   private static JobDescriptor defineJobDescriptor()
@@ -139,10 +133,4 @@ public class Main
     }
   }
 
-  private static JMXConnector initConnector( final ServiceDescriptor service )
-    throws IOException
-  {
-    final JMXServiceURL url = new JMXServiceURL( service.getURL() );
-    return JMXConnectorFactory.connect( url, service.getEnvironment() );
-  }
 }
