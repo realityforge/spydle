@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import javax.annotation.Nonnull;
+import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 
 /**
  * A simple handler that writes to graphite.
@@ -11,10 +12,10 @@ import javax.annotation.Nonnull;
 public final class GraphiteMetricHandler
   implements MetricHandler
 {
-  private final GraphiteServerDescriptor _descriptor;
+  private final GraphiteServiceDescriptor _descriptor;
   private OutputStream _outputStream;
 
-  public GraphiteMetricHandler( @Nonnull final GraphiteServerDescriptor descriptor )
+  public GraphiteMetricHandler( @Nonnull final GraphiteServiceDescriptor descriptor )
   {
     _descriptor = descriptor;
   }

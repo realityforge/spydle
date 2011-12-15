@@ -6,13 +6,14 @@ import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 
 public class ServiceEntry
 {
-  private final ServiceDescriptor _descriptor;
+  private final JmxServiceDescriptor _descriptor;
   private JMXConnector _connector;
 
-  public ServiceEntry( @Nonnull final ServiceDescriptor descriptor )
+  public ServiceEntry( @Nonnull final JmxServiceDescriptor descriptor )
   {
     _descriptor = descriptor;
   }

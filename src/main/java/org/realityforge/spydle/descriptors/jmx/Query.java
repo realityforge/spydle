@@ -1,4 +1,4 @@
-package org.realityforge.spydle;
+package org.realityforge.spydle.descriptors.jmx;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,9 +10,9 @@ import javax.annotation.Nullable;
 import javax.management.ObjectName;
 
 /**
- * A description of a query to ru against a JMX service.
+ * A description of a query to run against a JMX service.
  */
-public class QueryDescriptor
+public class Query
 {
   public static final String DOMAIN_COMPONENT = "DOMAIN";
   public static final String ATTRIBUTE_COMPONENT = "ATTRIBUTE";
@@ -22,17 +22,17 @@ public class QueryDescriptor
   private final Set<String> _attributeNames;
   private final List<String> _nameComponents;
 
-  public QueryDescriptor( @Nonnull final ObjectName objectName,
-                          @Nullable final Set<String> attributeNames,
-                          @Nullable final String namePrefix )
+  public Query( @Nonnull final ObjectName objectName,
+                @Nullable final Set<String> attributeNames,
+                @Nullable final String namePrefix )
   {
     this( objectName, attributeNames, namePrefix, null );
   }
 
-  public QueryDescriptor( @Nonnull final ObjectName objectName,
-                          @Nullable final Set<String> attributeNames,
-                          @Nullable final String namePrefix,
-                          @Nullable final List<String> nameComponents )
+  public Query( @Nonnull final ObjectName objectName,
+                @Nullable final Set<String> attributeNames,
+                @Nullable final String namePrefix,
+                @Nullable final List<String> nameComponents )
   {
     _objectName = objectName;
     _attributeNames =

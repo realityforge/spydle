@@ -1,4 +1,4 @@
-package org.realityforge.spydle;
+package org.realityforge.spydle.descriptors.graphite;
 
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;
@@ -7,14 +7,14 @@ import javax.annotation.Nullable;
 /**
  * Describes a graphite endpoint where data is sent.
  */
-public class GraphiteServerDescriptor
+public class GraphiteServiceDescriptor
 {
   private final InetSocketAddress _socketAddress;
   @Nullable
   private final String _prefix;
 
-  public GraphiteServerDescriptor( @Nonnull final InetSocketAddress socketAddress,
-                                   @Nullable final String prefix )
+  public GraphiteServiceDescriptor( @Nonnull final InetSocketAddress socketAddress,
+                                    @Nullable final String prefix )
   {
     _socketAddress = socketAddress;
     _prefix = prefix;

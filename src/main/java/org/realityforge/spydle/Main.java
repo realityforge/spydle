@@ -9,6 +9,10 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
+import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
+import org.realityforge.spydle.descriptors.jmx.Query;
+import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 
 public class Main
 {
@@ -18,64 +22,64 @@ public class Main
   public static void main( final String[] args )
     throws Exception
   {
-    final GraphiteServerDescriptor graphiteServer =
-      new GraphiteServerDescriptor( GRAPHITE_ADDRESS, "PD42.SS" );
-    final JobDescriptor job = defineJobDescriptor();
-    final ServiceEntry serviceEntry = new ServiceEntry( job.getService() );
+    final GraphiteServiceDescriptor descriptor =
+      new GraphiteServiceDescriptor( GRAPHITE_ADDRESS, "PD42.SS" );
+    final JmxTaskDescriptor task = defineJobDescriptor();
+    final ServiceEntry serviceEntry = new ServiceEntry( task.getService() );
 
     for( int i = 0; i < 10000000; i++ )
     {
       final MetricHandler handler =
-        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteServer ),
+        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( descriptor ),
                                                     new PrintStreamMetricHandler() } );
       handler.open();
-      for( final QueryDescriptor query : job.getQueries() )
+      for( final Query query : task.getQueries() )
       {
         collectQueryResults( serviceEntry.acquireConnection(), handler, query );
       }
       handler.close();
-      Thread.sleep( job.getDelay() );
+      Thread.sleep( task.getDelay() );
     }
 
     serviceEntry.close();
   }
 
-  private static JobDescriptor defineJobDescriptor()
+  private static JmxTaskDescriptor defineJobDescriptor()
     throws MalformedObjectNameException
   {
-    final QueryDescriptor query1 =
-      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final Query query1 =
+      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
                            null,
                            "Service1" );
     final HashSet<String> attributeNames = new HashSet<String>();
     attributeNames.add( "FreePhysicalMemorySize" );
-    final QueryDescriptor query2 =
-      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final Query query2 =
+      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
                            attributeNames,
                            "Service2" );
     final ArrayList<String> nameComponents = new ArrayList<String>();
     nameComponents.add( "type" );
-    nameComponents.add( QueryDescriptor.ATTRIBUTE_COMPONENT );
-    nameComponents.add( QueryDescriptor.DOMAIN_COMPONENT );
-    final QueryDescriptor query3 =
-      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+    nameComponents.add( Query.ATTRIBUTE_COMPONENT );
+    nameComponents.add( Query.DOMAIN_COMPONENT );
+    final Query query3 =
+      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
                            attributeNames,
                            "Service3",
                            nameComponents );
-    final QueryDescriptor query4 =
-      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final Query query4 =
+      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
                            attributeNames,
                            "Service4",
                            new ArrayList<String>() );
-    final QueryDescriptor query5 =
-      new QueryDescriptor( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final Query query5 =
+      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
                            null,
                            null );
-    final QueryDescriptor query6 =
-      new QueryDescriptor( new ObjectName( "java.lang:type=*" ),
+    final Query query6 =
+      new Query( new ObjectName( "java.lang:type=*" ),
                            null,
                            null );
-    final ArrayList<QueryDescriptor> queries = new ArrayList<QueryDescriptor>();
+    final ArrayList<Query> queries = new ArrayList<Query>();
     queries.add( query1 );
     queries.add( query2 );
     queries.add( query3 );
@@ -83,14 +87,14 @@ public class Main
     queries.add( query5 );
     queries.add( query6 );
 
-    final ServiceDescriptor service = new ServiceDescriptor( "127.0.0.1", 1105 );
+    final JmxServiceDescriptor service = new JmxServiceDescriptor( "127.0.0.1", 1105 );
     final int delay = 1000;
-    return new JobDescriptor( service, queries, delay );
+    return new JmxTaskDescriptor( service, queries, delay );
   }
 
   private static void collectQueryResults( final MBeanServerConnection mBeanServer,
                                            final MetricHandler handler,
-                                           final QueryDescriptor query )
+                                           final Query query )
     throws Exception
   {
     final ObjectName objectName = query.getObjectName();
@@ -110,7 +114,7 @@ public class Main
 
   private static void collectQueryResults( final MBeanServerConnection mBeanServer,
                                            final MetricHandler handler,
-                                           final QueryDescriptor query,
+                                           final Query query,
                                            final ObjectName objectName )
     throws Exception
   {

@@ -1,4 +1,4 @@
-package org.realityforge.spydle;
+package org.realityforge.spydle.descriptors.jmx;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import javax.management.remote.JMXConnector;
 /**
  * A descriptor describing how to access a JMX service.
  */
-public class ServiceDescriptor
+public class JmxServiceDescriptor
 {
   private final String _host;
   private final int _port;
@@ -18,10 +18,10 @@ public class ServiceDescriptor
   @Nullable
   private final String _password;
 
-  public ServiceDescriptor( @Nonnull final String host,
-                            final int port,
-                            @Nullable final String username,
-                            @Nullable final String password )
+  public JmxServiceDescriptor( @Nonnull final String host,
+                               final int port,
+                               @Nullable final String username,
+                               @Nullable final String password )
   {
     _host = host;
     _port = port;
@@ -29,7 +29,7 @@ public class ServiceDescriptor
     _password = password;
   }
 
-  public ServiceDescriptor( @Nonnull final String host, final int port )
+  public JmxServiceDescriptor( @Nonnull final String host, final int port )
   {
     this( host, port, null, null );
   }
