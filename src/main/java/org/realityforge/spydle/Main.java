@@ -34,12 +34,10 @@ public class Main
       final MetricHandler handler =
         new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteService ),
                                                     new PrintStreamMetricHandler() } );
-      handler.open();
       for( final Query query : task.getQueries() )
       {
         collectQueryResults( jmxService.acquireConnection(), handler, query );
       }
-      handler.close();
       Thread.sleep( task.getDelay() );
     }
     graphiteService.close();

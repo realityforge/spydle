@@ -13,24 +13,6 @@ public final class MultiMetricWriter
     _handlers = handlers;
   }
 
-  public void open()
-    throws IOException
-  {
-    for( final MetricHandler handler : _handlers )
-    {
-      handler.open();
-    }
-  }
-
-  public void close()
-    throws IOException
-  {
-    for( final MetricHandler handler : _handlers )
-    {
-      handler.close();
-    }
-  }
-
   public void metric( final String key, final long timeInMillis, final long value )
     throws IOException
   {

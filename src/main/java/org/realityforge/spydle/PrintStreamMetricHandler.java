@@ -22,16 +22,6 @@ public class PrintStreamMetricHandler
     _writer = writer;
   }
 
-  public void open()
-    throws IOException
-  {
-  }
-
-  public void close()
-    throws IOException
-  {
-  }
-
   public void metric( final String key, final long timeInMillis, final long value )
     throws IOException
   {

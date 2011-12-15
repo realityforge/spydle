@@ -43,12 +43,4 @@ public final class GraphiteMetricHandler
   {
     return timeInMillis / 1000;
   }
-
-  public void open()
-  {
-  }
-
-  public void close()
-  {
-  }
 }
