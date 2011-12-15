@@ -55,6 +55,5 @@ public class JmxService
       }
       _connector = null;
     }
-
   }
 }
