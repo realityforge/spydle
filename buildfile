@@ -8,7 +8,8 @@ define('spydle') do
   compile.options.target = '1.6'
   compile.options.lint = 'all'
 
-  compile.with :javax_annotation
+  compile.with :javax_annotation,
+               :netty
 
   package(:jar)
   package(:sources)
