@@ -1,4 +1,4 @@
-package org.realityforge.spydle;
+package org.realityforge.spydle.runtime.jmx;
 
 import java.io.IOException;
 import javax.annotation.Nonnull;

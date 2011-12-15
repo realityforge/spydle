@@ -13,6 +13,7 @@ import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.descriptors.jmx.Query;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
+import org.realityforge.spydle.runtime.jmx.JmxService;
 
 public class Main
 {
