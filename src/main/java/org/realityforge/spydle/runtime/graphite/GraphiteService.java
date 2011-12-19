@@ -1,12 +1,15 @@
 package org.realityforge.spydle.runtime.graphite;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
+import org.realityforge.spydle.runtime.MetricValue;
 
 public final class GraphiteService
+  implements Closeable
 {
   private final GraphiteServiceDescriptor _descriptor;
   private OutputStream _outputStream;
@@ -17,12 +20,29 @@ public final class GraphiteService
     _descriptor = descriptor;
   }
 
-  public GraphiteServiceDescriptor getDescriptor()
+  public void writeMetric( final MetricValue metric )
+    throws IOException
   {
-    return _descriptor;
+    final StringBuilder sb = new StringBuilder();
+    final String prefix = _descriptor.getPrefix();
+    if( null != prefix )
+    {
+      sb.append( prefix );
+      if( sb.length() > 0 )
+      {
+        sb.append( '.' );
+      }
+    }
+    sb.append( metric.getKey() );
+    sb.append( ' ' );
+    sb.append( metric.getValue() );
+    sb.append( ' ' );
+    sb.append( toUnixEpoch( metric.getCollectedAt() ) );
+    sb.append( '\n' );
+    acquireConnection().write( sb.toString().getBytes( "US-ASCII" ) );
   }
 
-  public OutputStream acquireConnection()
+  private OutputStream acquireConnection()
     throws IOException
   {
     if( null != _socket )
@@ -65,5 +85,10 @@ public final class GraphiteService
       }
       _outputStream = null;
     }
+  }
+
+  private long toUnixEpoch( final long timeInMillis )
+  {
+    return timeInMillis / 1000;
   }
 }
