@@ -9,7 +9,7 @@ import javax.management.remote.JMXConnector;
 /**
  * A descriptor describing how to access a JMX service.
  */
-public class JmxServiceDescriptor
+public final class JmxServiceDescriptor
 {
   private final String _host;
   private final int _port;

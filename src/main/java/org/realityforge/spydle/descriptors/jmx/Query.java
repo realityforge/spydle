@@ -12,7 +12,7 @@ import javax.management.ObjectName;
 /**
  * A description of a query to run against a JMX service.
  */
-public class Query
+public final class Query
 {
   public static final String DOMAIN_COMPONENT = "DOMAIN";
   public static final String ATTRIBUTE_COMPONENT = "ATTRIBUTE";
