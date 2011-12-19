@@ -1,5 +1,6 @@
 package org.realityforge.spydle.runtime.jmx;
 
+import java.io.Closeable;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import javax.management.MBeanServerConnection;
@@ -9,6 +10,7 @@ import javax.management.remote.JMXServiceURL;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 
 public class JmxService
+  implements Closeable
 {
   private final JmxServiceDescriptor _descriptor;
   private JMXConnector _connector;
