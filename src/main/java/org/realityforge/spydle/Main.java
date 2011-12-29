@@ -132,7 +132,7 @@ public class Main
         {
           final String key = query.generateKey( objectName, attributeName );
           final MetricValue metricValue =
-            new MetricValue( key, ( (Number) value ).longValue(), System.currentTimeMillis() );
+            new MetricValue( key, (Number) value, System.currentTimeMillis() );
           handler.metric( metricValue );
         }
       }

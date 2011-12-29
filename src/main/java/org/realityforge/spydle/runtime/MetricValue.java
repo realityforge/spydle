@@ -1,12 +1,14 @@
 package org.realityforge.spydle.runtime;
 
+import javax.annotation.Nonnull;
+
 public final class MetricValue
 {
   private final String _key;
-  private final long _value;
+  private final Number _value;
   private final long _collectedAt;
 
-  public MetricValue( final String key, final long value, final long collectedAt )
+  public MetricValue( final String key, @Nonnull final Number value, final long collectedAt )
   {
     _key = key;
     _value = value;
@@ -18,7 +20,7 @@ public final class MetricValue
     return _key;
   }
 
-  public long getValue()
+  public Number getValue()
   {
     return _value;
   }
