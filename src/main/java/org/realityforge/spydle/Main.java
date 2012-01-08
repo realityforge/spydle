@@ -89,8 +89,7 @@ public class Main
     queries.add( query6 );
 
     final JmxServiceDescriptor service = new JmxServiceDescriptor( "127.0.0.1", 1105 );
-    final int delay = 1000;
-    return new JmxTaskDescriptor( service, queries, delay );
+    return new JmxTaskDescriptor( service, queries, 1000 );
   }
 
   private static void collectQueryResults( final MBeanServerConnection mBeanServer,
