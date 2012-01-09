@@ -11,15 +11,15 @@ import javax.annotation.Nonnull;
 public class JmxTaskDescriptor
 {
   private final JmxServiceDescriptor _service;
-  private final List<Query> _queries;
+  private final List<JmxQuery> _queries;
   private final long _delay;
 
   public JmxTaskDescriptor( @Nonnull final JmxServiceDescriptor service,
-                            @Nonnull final List<Query> queries,
+                            @Nonnull final List<JmxQuery> queries,
                             final long delay )
   {
     _service = service;
-    _queries = Collections.unmodifiableList( new ArrayList<Query>( queries ) );
+    _queries = Collections.unmodifiableList( new ArrayList<JmxQuery>( queries ) );
     _delay = delay;
   }
 
@@ -28,7 +28,7 @@ public class JmxTaskDescriptor
     return _service;
   }
 
-  public List<Query> getQueries()
+  public List<JmxQuery> getQueries()
   {
     return _queries;
   }

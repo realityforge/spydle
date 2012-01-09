@@ -12,7 +12,7 @@ import javax.management.ObjectName;
 /**
  * A description of a query to run against a JMX service.
  */
-public class Query
+public class JmxQuery
 {
   public static final String DOMAIN_COMPONENT = "DOMAIN";
   public static final String ATTRIBUTE_COMPONENT = "ATTRIBUTE";
@@ -22,17 +22,17 @@ public class Query
   private final Set<String> _attributeNames;
   private final List<String> _nameComponents;
 
-  public Query( @Nonnull final ObjectName objectName,
-                @Nullable final Set<String> attributeNames,
-                @Nullable final String namePrefix )
+  public JmxQuery( @Nonnull final ObjectName objectName,
+                   @Nullable final Set<String> attributeNames,
+                   @Nullable final String namePrefix )
   {
     this( objectName, attributeNames, namePrefix, null );
   }
 
-  public Query( @Nonnull final ObjectName objectName,
-                @Nullable final Set<String> attributeNames,
-                @Nullable final String namePrefix,
-                @Nullable final List<String> nameComponents )
+  public JmxQuery( @Nonnull final ObjectName objectName,
+                   @Nullable final Set<String> attributeNames,
+                   @Nullable final String namePrefix,
+                   @Nullable final List<String> nameComponents )
   {
     _objectName = objectName;
     _attributeNames =

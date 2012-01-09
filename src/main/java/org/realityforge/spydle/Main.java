@@ -12,7 +12,7 @@ import javax.management.ObjectName;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
-import org.realityforge.spydle.descriptors.jmx.Query;
+import org.realityforge.spydle.descriptors.jmx.JmxQuery;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jmx.JmxService;
@@ -35,7 +35,7 @@ public class Main
       final MetricHandler handler =
         new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteService ),
                                                     new PrintStreamMetricHandler() } );
-      for( final Query query : task.getQueries() )
+      for( final JmxQuery query : task.getQueries() )
       {
         collectQueryResults( jmxService.acquireConnection(), handler, query );
       }
@@ -48,39 +48,39 @@ public class Main
   private static JmxTaskDescriptor defineJobDescriptor()
     throws MalformedObjectNameException
   {
-    final Query query1 =
-      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final JmxQuery query1 =
+      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                  null,
                  "Service1" );
     final HashSet<String> attributeNames = new HashSet<String>();
     attributeNames.add( "FreePhysicalMemorySize" );
-    final Query query2 =
-      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final JmxQuery query2 =
+      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                  attributeNames,
                  "Service2" );
     final ArrayList<String> nameComponents = new ArrayList<String>();
     nameComponents.add( "type" );
-    nameComponents.add( Query.ATTRIBUTE_COMPONENT );
-    nameComponents.add( Query.DOMAIN_COMPONENT );
-    final Query query3 =
-      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
+    nameComponents.add( JmxQuery.ATTRIBUTE_COMPONENT );
+    nameComponents.add( JmxQuery.DOMAIN_COMPONENT );
+    final JmxQuery query3 =
+      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                  attributeNames,
                  "Service3",
                  nameComponents );
-    final Query query4 =
-      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final JmxQuery query4 =
+      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                  attributeNames,
                  "Service4",
                  new ArrayList<String>() );
-    final Query query5 =
-      new Query( new ObjectName( "java.lang:type=OperatingSystem" ),
+    final JmxQuery query5 =
+      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                  null,
                  null );
-    final Query query6 =
-      new Query( new ObjectName( "java.lang:type=*" ),
+    final JmxQuery query6 =
+      new JmxQuery( new ObjectName( "java.lang:type=*" ),
                  null,
                  null );
-    final ArrayList<Query> queries = new ArrayList<Query>();
+    final ArrayList<JmxQuery> queries = new ArrayList<JmxQuery>();
     queries.add( query1 );
     queries.add( query2 );
     queries.add( query3 );
@@ -94,7 +94,7 @@ public class Main
 
   private static void collectQueryResults( final MBeanServerConnection mBeanServer,
                                            final MetricHandler handler,
-                                           final Query query )
+                                           final JmxQuery query )
     throws Exception
   {
     final ObjectName objectName = query.getObjectName();
@@ -114,7 +114,7 @@ public class Main
 
   private static void collectQueryResults( final MBeanServerConnection mBeanServer,
                                            final MetricHandler handler,
-                                           final Query query,
+                                           final JmxQuery query,
                                            final ObjectName objectName )
     throws Exception
   {
