@@ -9,12 +9,15 @@ import javax.annotation.Nullable;
 public class JdbcQuery
 {
   private final String _query;
+  private final String _keyColumn;
   private final String _namePrefix;
 
   public JdbcQuery( @Nonnull final String query,
+                    @Nullable final String keyColumn,
                     @Nullable final String namePrefix )
   {
     _query = query;
+    _keyColumn = keyColumn;
     _namePrefix = namePrefix;
   }
 
@@ -25,18 +28,28 @@ public class JdbcQuery
   }
 
   @Nullable
+  public String getKeyColumn()
+  {
+    return _keyColumn;
+  }
+
+  @Nullable
   public String getNamePrefix()
   {
     return _namePrefix;
   }
 
-  public String generateKey( final String columnName )
+  public String generateKey( final String keyValue, final String columnName )
   {
     final String namePrefix = getNamePrefix();
     final StringBuilder sb = new StringBuilder();
     if( null != namePrefix )
     {
       sb.append( namePrefix );
+    }
+    if( null != keyValue )
+    {
+      appendNameComponent( sb, cleanString( keyValue ) );
     }
     appendNameComponent( sb, cleanString( columnName ) );
     return sb.toString();

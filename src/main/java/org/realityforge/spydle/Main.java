@@ -91,12 +91,21 @@ public class Main
     }
     while( resultSet.next() )
     {
+      final String key;
+      if( null != query.getKeyColumn() )
+      {
+        key = resultSet.getObject( query.getKeyColumn() ).toString();
+      }
+      else
+      {
+        key = null;
+      }
       for( final Map.Entry<String, Integer> entry : columns.entrySet() )
       {
-        final String key = entry.getKey();
-        final Object value = resultSet.getObject( key );
+        final String columnName = entry.getKey();
+        final Object value = resultSet.getObject( columnName );
         final MetricValue metricValue =
-          new MetricValue( query.generateKey( entry.getKey() ), (Number) value, System.currentTimeMillis() );
+          new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value, System.currentTimeMillis() );
         handler.metric( metricValue );
       }
     }
@@ -107,7 +116,7 @@ public class Main
   private static JdbcTaskDescriptor defineJdbcJobDescriptor()
   {
     final JdbcQuery query1 =
-      new JdbcQuery( "CALL 1", "Service1" );
+      new JdbcQuery( "CALL 1", null, "Service1" );
     final ArrayList<JdbcQuery> queries = new ArrayList<JdbcQuery>();
     queries.add( query1 );
 
