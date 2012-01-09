@@ -96,7 +96,7 @@ public class Main
         final String key = entry.getKey();
         final Object value = resultSet.getObject( key );
         final MetricValue metricValue =
-          new MetricValue( key, (Number) value, System.currentTimeMillis() );
+          new MetricValue( query.generateKey( entry.getKey() ), (Number) value, System.currentTimeMillis() );
         handler.metric( metricValue );
       }
     }

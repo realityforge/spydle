@@ -1,13 +1,7 @@
 package org.realityforge.spydle.descriptors.jdbc;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.management.ObjectName;
 
 /**
  * A description of a query to run against a JDBC service.
@@ -60,6 +54,7 @@ public class JdbcQuery
   private static String cleanString( final String name )
   {
     return name.
+      replace( '@', '_' ).
       replace( '.', '_' ).
       replace( '=', '_' ).
       replace( ':', '_' );
