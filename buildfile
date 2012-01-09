@@ -8,7 +8,8 @@ define('spydle') do
   compile.options.target = '1.6'
   compile.options.lint = 'all'
 
-  compile.with :javax_annotation
+  compile.with :javax_annotation,
+               :hsqldb
 
   package(:jar)
   package(:sources)
