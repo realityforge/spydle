@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
+import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
 
 public final class GraphiteService
@@ -33,7 +34,8 @@ public final class GraphiteService
         sb.append( '.' );
       }
     }
-    sb.append( metric.getName() );
+    final MetricName name = metric.getName();
+    sb.append( name.getNamespace().toString().replace( '.','_' ).replace( ',','.' ) + '.' + name.getKey() );
     sb.append( ' ' );
     sb.append( metric.getValue() );
     sb.append( ' ' );
