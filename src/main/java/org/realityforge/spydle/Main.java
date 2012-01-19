@@ -41,7 +41,7 @@ import org.rrd4j.core.Sample;
 public class Main
 {
 
-  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.12", 2003 );
+  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.16", 2003 );
 
   public static void main( final String[] args )
     throws Exception
