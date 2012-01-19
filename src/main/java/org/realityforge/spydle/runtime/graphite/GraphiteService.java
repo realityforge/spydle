@@ -33,7 +33,7 @@ public final class GraphiteService
         sb.append( '.' );
       }
     }
-    sb.append( metric.getKey() );
+    sb.append( metric.getName() );
     sb.append( ' ' );
     sb.append( metric.getValue() );
     sb.append( ' ' );

@@ -1,7 +1,10 @@
 package org.realityforge.spydle.descriptors.jdbc;
 
+import java.util.LinkedHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.realityforge.spydle.runtime.MetricName;
+import org.realityforge.spydle.runtime.Namespace;
 
 /**
  * A description of a query to run against a JDBC service.
@@ -10,15 +13,15 @@ public class JdbcQuery
 {
   private final String _query;
   private final String _keyColumn;
-  private final String _namePrefix;
+  private final Namespace _namespace;
 
   public JdbcQuery( @Nonnull final String query,
                     @Nullable final String keyColumn,
-                    @Nullable final String namePrefix )
+                    @Nullable final Namespace namespace )
   {
     _query = query;
     _keyColumn = keyColumn;
-    _namePrefix = namePrefix;
+    _namespace = namespace;
   }
 
   @Nonnull
@@ -34,42 +37,23 @@ public class JdbcQuery
   }
 
   @Nullable
-  public String getNamePrefix()
+  public Namespace getNamespace()
   {
-    return _namePrefix;
+    return _namespace;
   }
 
-  public String generateKey( final String keyValue, final String columnName )
+  public MetricName generateKey( final String keyValue, final String columnName )
   {
-    final String namePrefix = getNamePrefix();
-    final StringBuilder sb = new StringBuilder();
+    final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+    final Namespace namePrefix = getNamespace();
     if( null != namePrefix )
     {
-      sb.append( namePrefix );
+      map.putAll( namePrefix.getNameComponents() );
     }
     if( null != keyValue )
     {
-      appendNameComponent( sb, cleanString( keyValue ) );
+      map.put( _keyColumn, keyValue );
     }
-    appendNameComponent( sb, cleanString( columnName ) );
-    return sb.toString();
-  }
-
-  private void appendNameComponent( final StringBuilder sb, final String value )
-  {
-    if( 0 != sb.length() )
-    {
-      sb.append( '.' );
-    }
-    sb.append( cleanString( value ) );
-  }
-
-  private static String cleanString( final String name )
-  {
-    return name.
-      replace( '@', '_' ).
-      replace( '.', '_' ).
-      replace( '=', '_' ).
-      replace( ':', '_' );
+    return new MetricName( new Namespace( map ), columnName );
   }
 }

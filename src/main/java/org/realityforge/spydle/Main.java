@@ -11,6 +11,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanAttributeInfo;
@@ -22,10 +23,12 @@ import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.descriptors.jdbc.JdbcQuery;
 import org.realityforge.spydle.descriptors.jdbc.JdbcServiceDescriptor;
 import org.realityforge.spydle.descriptors.jdbc.JdbcTaskDescriptor;
+import org.realityforge.spydle.descriptors.jmx.JmxQuery;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
-import org.realityforge.spydle.descriptors.jmx.JmxQuery;
+import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
+import org.realityforge.spydle.runtime.Namespace;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jdbc.JdbcService;
 import org.realityforge.spydle.runtime.jmx.JmxService;
@@ -116,7 +119,7 @@ public class Main
   private static JdbcTaskDescriptor defineJdbcJobDescriptor()
   {
     final JdbcQuery query1 =
-      new JdbcQuery( "CALL 1", null, "Service1" );
+      new JdbcQuery( "CALL 1", null, newNamespace( "Service1" ) );
     final ArrayList<JdbcQuery> queries = new ArrayList<JdbcQuery>();
     queries.add( query1 );
 
@@ -130,13 +133,13 @@ public class Main
     final JmxQuery query1 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     null,
-                    "Service1" );
+                    newNamespace( "Service1" ) );
     final HashSet<String> attributeNames = new HashSet<String>();
     attributeNames.add( "FreePhysicalMemorySize" );
     final JmxQuery query2 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     attributeNames,
-                    "Service2" );
+                    newNamespace( "Service2" ) );
     final ArrayList<String> nameComponents = new ArrayList<String>();
     nameComponents.add( "type" );
     nameComponents.add( JmxQuery.ATTRIBUTE_COMPONENT );
@@ -144,12 +147,12 @@ public class Main
     final JmxQuery query3 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     attributeNames,
-                    "Service3",
+                    newNamespace( "Service3"),
                     nameComponents );
     final JmxQuery query4 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     attributeNames,
-                    "Service4",
+                    newNamespace( "Service4" ),
                     new ArrayList<String>() );
     final JmxQuery query5 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
@@ -169,6 +172,13 @@ public class Main
 
     final JmxServiceDescriptor service = new JmxServiceDescriptor( "127.0.0.1", 1105 );
     return new JmxTaskDescriptor( service, queries, 1000 );
+  }
+
+  private static Namespace newNamespace( final String serviceName )
+  {
+    final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+    map.put( "Service", serviceName );
+    return new Namespace( map );
   }
 
   private static void collectQueryResults( final MBeanServerConnection mBeanServer,
@@ -208,9 +218,9 @@ public class Main
         final Object value = mBeanServer.getAttribute( objectName, attributeName );
         if( value instanceof Number )
         {
-          final String key = query.generateKey( objectName, attributeName );
+          final MetricName name = query.generateKey( objectName, attributeName );
           final MetricValue metricValue =
-            new MetricValue( key, (Number) value, System.currentTimeMillis() );
+            new MetricValue( name, (Number) value, System.currentTimeMillis() );
           handler.metric( metricValue );
         }
       }

@@ -26,6 +26,6 @@ public class PrintStreamMetricHandler
   public void metric( final MetricValue metric )
     throws IOException
   {
-    _writer.println( metric.getKey() + " = " + metric.getValue() );
+    _writer.println( metric.getName() + " = " + metric.getValue() );
   }
 }
