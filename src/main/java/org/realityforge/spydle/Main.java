@@ -32,6 +32,11 @@ import org.realityforge.spydle.runtime.Namespace;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jdbc.JdbcService;
 import org.realityforge.spydle.runtime.jmx.JmxService;
+import org.rrd4j.ConsolFun;
+import org.rrd4j.DsType;
+import org.rrd4j.core.RrdDb;
+import org.rrd4j.core.RrdDef;
+import org.rrd4j.core.Sample;
 
 public class Main
 {
@@ -49,8 +54,24 @@ public class Main
     final JdbcTaskDescriptor jdbcTask = defineJdbcJobDescriptor();
     final JdbcService jdbcService = new JdbcService( jdbcTask.getService() );
 
+    // first, define the RRD
+    final RrdDef rrdDef = new RrdDef( "target/foo.rrd", 300 );
+    rrdDef.addDatasource( "inbytes", DsType.GAUGE, 600, 0, Double.NaN );
+    rrdDef.addDatasource( "outbytes", DsType.GAUGE, 600, 0, Double.NaN );
+    rrdDef.addArchive( ConsolFun.AVERAGE, 0.5, 1, 600 ); // 1 step, 600 rows
+    rrdDef.addArchive( ConsolFun.AVERAGE, 0.5, 6, 700 ); // 6 steps, 700 rows
+    rrdDef.addArchive( ConsolFun.MAX, 0.5, 1, 600 );
+
+
+    final RrdDb rrdDb = new RrdDb( rrdDef );
+    Sample sample = rrdDb.createSample();
+
     for( int i = 0; i < 10000000; i++ )
     {
+      sample.setTime( System.currentTimeMillis() );
+      sample.setValue( "inbytes", 23 );
+      sample.setValue( "outbytes", 42 );
+      sample.update();
       final MetricHandler handler =
         new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteService ),
                                                     new PrintStreamMetricHandler() } );
@@ -67,6 +88,7 @@ public class Main
     graphiteService.close();
     jmxService.close();
     jdbcService.close();
+    rrdDb.close();
   }
 
   private static void collectJdbcQueryResults( final Connection connection, final MetricHandler handler, final JdbcQuery query )
