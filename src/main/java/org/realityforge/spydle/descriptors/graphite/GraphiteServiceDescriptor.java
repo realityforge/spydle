@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 /**
  * Describes a graphite endpoint where data is sent.
  */
-public class GraphiteServiceDescriptor
+public final class GraphiteServiceDescriptor
 {
   private final InetSocketAddress _socketAddress;
   @Nullable

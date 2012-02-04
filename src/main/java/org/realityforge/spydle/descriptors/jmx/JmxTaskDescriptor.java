@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 /**
  * Describes a batch of queries against a service invoked with a set delay between queries.
  */
-public class JmxTaskDescriptor
+public final class JmxTaskDescriptor
 {
   private final JmxServiceDescriptor _service;
   private final List<JmxQuery> _queries;
