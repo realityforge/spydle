@@ -18,4 +18,10 @@ define('spydle') do
   test.compile.with :mockito
 
   emma.include 'org.realityforge.*'
+
+  ipr.extra_modules << '../jcollectd/jcollectd.iml'
+  ipr.extra_modules << '../membrane/membrane.iml'
+  ipr.extra_modules << '../jrds/jrds.iml'
+  ipr.extra_modules << '../gdash/gdash.iml'
+  ipr.extra_modules << '../graphite-relay/graphite-relay.iml'
 end
