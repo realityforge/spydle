@@ -11,11 +11,6 @@ public final class PrintStreamMetricSink
 {
   private final PrintStream _writer;
 
-  public PrintStreamMetricSink()
-  {
-    this( System.out );
-  }
-
   public PrintStreamMetricSink( @Nonnull final PrintStream writer )
   {
     _writer = writer;

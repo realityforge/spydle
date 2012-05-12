@@ -126,7 +126,7 @@ public class Main
         }
       }
       final MetricSink sink =
-        new MulticastMetricSink( new MetricSink[]{ graphiteService, new PrintStreamMetricSink() } );
+        new MulticastMetricSink( new MetricSink[]{ graphiteService, new PrintStreamMetricSink( System.out ) } );
 
       MetricValueSet poll = jmxService.poll();
       if( null != poll )
