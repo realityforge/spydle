@@ -1,6 +1,13 @@
 package org.realityforge.spydle;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -41,10 +48,13 @@ import org.realityforge.spydle.runtime.jmx.JmxService;
 
 public class Main
 {
+  private static final String DEFAULT_CONFIG_DIRECTORY = "./conf.d";
+
   private static final int HELP_OPT = 1;
   private static final int HOST_CONFIG_OPT = 'h';
   private static final int PORT_CONFIG_OPT = 'p';
   private static final int VERBOSE_OPT = 'v';
+  private static final int CONFIG_DIRECTORY_CONFIG_OPT = 'd';
 
   private static final CLOptionDescriptor[] OPTIONS = new CLOptionDescriptor[]{
     new CLOptionDescriptor( "help",
@@ -63,6 +73,10 @@ public class Main
                             CLOptionDescriptor.ARGUMENT_DISALLOWED,
                             VERBOSE_OPT,
                             "print verbose message while sending the message." ),
+    new CLOptionDescriptor( "config-directory",
+                            CLOptionDescriptor.ARGUMENT_REQUIRED,
+                            CONFIG_DIRECTORY_CONFIG_OPT,
+                            "the directory in which configuration is read from. Defaults to " + DEFAULT_CONFIG_DIRECTORY ),
   };
 
   private static final int SUCCESS_EXIT_CODE = 0;
@@ -71,7 +85,7 @@ public class Main
   private static boolean c_verbose;
   private static String c_graphiteHost = "127.0.0.1";
   private static int c_graphitePort = GraphiteServiceDescriptor.DEFAULT_PORT;
-
+  private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY );
 
   public static void main( final String[] args )
     throws Exception
@@ -81,6 +95,14 @@ public class Main
       System.exit( ERROR_PARSING_ARGS_EXIT_CODE );
       return;
     }
+
+    final WatchService watcher = FileSystems.getDefault().newWatchService();
+    final Path path = c_configDirectory.toPath();
+
+    path.register( watcher,
+                   StandardWatchEventKinds.ENTRY_CREATE,
+                   StandardWatchEventKinds.ENTRY_DELETE,
+                   StandardWatchEventKinds.ENTRY_MODIFY );
 
     final GraphiteService graphiteService =
       new GraphiteService( new GraphiteServiceDescriptor( c_graphiteHost, c_graphitePort, "PD42.SS" ) );
@@ -92,6 +114,35 @@ public class Main
 
     for( int i = 0; i < 10000000; i++ )
     {
+      final WatchKey key = watcher.poll();
+      if( null != key )
+      {
+        for( final WatchEvent<?> event : key.pollEvents() )
+        {
+          final WatchEvent.Kind<?> kind = event.kind();
+          if( StandardWatchEventKinds.OVERFLOW == kind )
+          {
+            continue;
+          }
+          else
+          {
+            @SuppressWarnings( "unchecked" )
+            final WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
+            if( StandardWatchEventKinds.ENTRY_CREATE == kind )
+            {
+              System.out.println( "File added: " + pathEvent.context().getFileName() );
+            }
+            else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
+            {
+              System.out.println( "File removed: " + pathEvent.context().getFileName() );
+            }
+            else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
+            {
+              System.out.println( "File modified: " + pathEvent.context().getFileName() );
+            }
+          }
+        }
+      }
       final MetricHandler handler =
         new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteService ),
                                                     new PrintStreamMetricHandler() } );
@@ -112,6 +163,7 @@ public class Main
     graphiteService.close();
     jmxService.close();
     jdbcService.close();
+    watcher.close();
 
     System.exit( SUCCESS_EXIT_CODE );
   }
@@ -315,6 +367,11 @@ public class Main
           }
           break;
         }
+        case CONFIG_DIRECTORY_CONFIG_OPT:
+        {
+          c_configDirectory = new File( option.getArgument() );
+          break;
+        }
         case VERBOSE_OPT:
         {
           c_verbose = true;
@@ -328,6 +385,19 @@ public class Main
 
       }
     }
+
+    if( !c_configDirectory.exists() )
+    {
+      error( "Config directory does not exist: " + c_configDirectory );
+      return false;
+    }
+
+    if( !c_configDirectory.isDirectory() )
+    {
+      error( "Config directory is not a directory: " + c_configDirectory );
+      return false;
+    }
+
     if( c_verbose )
     {
       info( "Server Host: " + c_graphiteHost );
