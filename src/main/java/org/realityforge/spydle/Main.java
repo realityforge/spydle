@@ -8,10 +8,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -97,11 +97,15 @@ public class Main
                                                     new PrintStreamMetricHandler() } );
       for( final JmxQuery query : task.getQueries() )
       {
-        collectQueryResults( jmxService.acquireConnection(), handler, query );
+        final LinkedList<MetricValue> metrics = new LinkedList<>();
+        collectQueryResults( metrics, jmxService.acquireConnection(), query );
+        handler.metrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
       }
       for( final JdbcQuery query : jdbcTask.getQueries() )
       {
-        collectJdbcQueryResults( jdbcService.acquireConnection(), handler, query );
+        final LinkedList<MetricValue> metrics = new LinkedList<>();
+        collectJdbcQueryResults( metrics, jdbcService.acquireConnection(), query );
+        handler.metrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
       }
       Thread.sleep( task.getDelay() );
     }
@@ -112,7 +116,9 @@ public class Main
     System.exit( SUCCESS_EXIT_CODE );
   }
 
-  private static void collectJdbcQueryResults( final Connection connection, final MetricHandler handler, final JdbcQuery query )
+  private static void collectJdbcQueryResults( final LinkedList<MetricValue> metrics,
+                                               final Connection connection,
+                                               final JdbcQuery query )
     throws SQLException, IOException
   {
     final Statement statement = connection.createStatement();
@@ -150,9 +156,7 @@ public class Main
       {
         final String columnName = entry.getKey();
         final Object value = resultSet.getObject( columnName );
-        final MetricValue metricValue =
-          new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value );
-        handler.metrics( new MetricValueSet( Arrays.asList( metricValue ), System.currentTimeMillis() ) );
+        metrics.add( new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value ) );
       }
     }
     resultSet.close();
@@ -224,8 +228,8 @@ public class Main
     return new Namespace( map );
   }
 
-  private static void collectQueryResults( final MBeanServerConnection mBeanServer,
-                                           final MetricHandler handler,
+  private static void collectQueryResults( final LinkedList<MetricValue> metrics,
+                                           final MBeanServerConnection mBeanServer,
                                            final JmxQuery query )
     throws Exception
   {
@@ -235,17 +239,17 @@ public class Main
       final Set<ObjectName> objectNames = mBeanServer.queryNames( objectName, null );
       for( final ObjectName candidate : objectNames )
       {
-        collectQueryResults( mBeanServer, handler, query, candidate );
+        collectQueryResults( metrics, mBeanServer, query, candidate );
       }
     }
     else
     {
-      collectQueryResults( mBeanServer, handler, query, objectName );
+      collectQueryResults( metrics, mBeanServer, query, objectName );
     }
   }
 
-  private static void collectQueryResults( final MBeanServerConnection mBeanServer,
-                                           final MetricHandler handler,
+  private static void collectQueryResults( final LinkedList<MetricValue> metrics,
+                                           final MBeanServerConnection mBeanServer,
                                            final JmxQuery query,
                                            final ObjectName objectName )
     throws Exception
@@ -263,7 +267,7 @@ public class Main
         {
           final MetricName name = query.generateKey( objectName, attributeName );
           final MetricValue metricValue = new MetricValue( name, (Number) value );
-          handler.metrics( new MetricValueSet( Arrays.asList( metricValue ), System.currentTimeMillis() ) );
+          metrics.add( metricValue );
         }
       }
     }
