@@ -112,6 +112,7 @@ public final class JdbcService
                                         final JdbcQuery query )
     throws SQLException, IOException
   {
+    //TODO: Gracefully handle SQL exceptions and close resources correctly
     final Statement statement = connection.createStatement();
     final ResultSet resultSet = statement.executeQuery( query.getQuery() );
     final HashMap<String, Integer> columns = new HashMap<>();
