@@ -382,7 +382,6 @@ public class Main
           printUsage();
           return false;
         }
-
       }
     }
 
