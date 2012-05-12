@@ -12,15 +12,12 @@ public class JdbcTaskDescriptor
 {
   private final JdbcServiceDescriptor _service;
   private final List<JdbcQuery> _queries;
-  private final long _delay;
 
   public JdbcTaskDescriptor( @Nonnull final JdbcServiceDescriptor service,
-                             @Nonnull final List<JdbcQuery> queries,
-                             final long delay )
+                             @Nonnull final List<JdbcQuery> queries )
   {
     _service = service;
     _queries = Collections.unmodifiableList( new ArrayList<>( queries ) );
-    _delay = delay;
   }
 
   public JdbcServiceDescriptor getService()
@@ -31,10 +28,5 @@ public class JdbcTaskDescriptor
   public List<JdbcQuery> getQueries()
   {
     return _queries;
-  }
-
-  public long getDelay()
-  {
-    return _delay;
   }
 }

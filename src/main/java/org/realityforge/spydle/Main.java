@@ -157,7 +157,7 @@ public class Main
     queries.add( query1 );
 
     final JdbcServiceDescriptor service = new JdbcServiceDescriptor( "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:aname", "sa", "" );
-    return new JdbcTaskDescriptor( service, queries, 1000 );
+    return new JdbcTaskDescriptor( service, queries );
   }
 
   private static JmxTaskDescriptor defineJobDescriptor()
