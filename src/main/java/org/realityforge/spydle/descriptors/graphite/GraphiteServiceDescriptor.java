@@ -9,15 +9,34 @@ import javax.annotation.Nullable;
  */
 public final class GraphiteServiceDescriptor
 {
+  public static final int DEFAULT_PORT = 2003;
+
   private final InetSocketAddress _socketAddress;
+  @Nonnull
+  private final String _host;
+  private final int _port;
   @Nullable
   private final String _prefix;
 
-  public GraphiteServiceDescriptor( @Nonnull final InetSocketAddress socketAddress,
+  public GraphiteServiceDescriptor( @Nonnull final String host, 
+                                    final int port,
                                     @Nullable final String prefix )
   {
-    _socketAddress = socketAddress;
+    _host = host;
+    _port = port;
+    _socketAddress = new InetSocketAddress( getHost(), getPort() );
     _prefix = prefix;
+  }
+
+  @Nonnull
+  public String getHost()
+  {
+    return _host;
+  }
+
+  public int getPort()
+  {
+    return _port;
   }
 
   @Nonnull
