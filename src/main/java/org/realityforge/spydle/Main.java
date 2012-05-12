@@ -70,7 +70,7 @@ public class Main
 
   private static boolean c_verbose;
   private static String c_graphiteHost = "127.0.0.1";
-  private static int c_graphitePort = 2003;
+  private static int c_graphitePort = GraphiteServiceDescriptor.DEFAULT_PORT;
 
 
   public static void main( final String[] args )
