@@ -21,10 +21,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.realityforge.cli.CLArgsParser;
@@ -39,7 +35,6 @@ import org.realityforge.spydle.descriptors.jmx.JmxQuery;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.runtime.MetricSink;
-import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.MulticastMetricSink;
@@ -110,7 +105,7 @@ public class Main
     final GraphiteService graphiteService =
       new GraphiteService( new GraphiteServiceDescriptor( c_graphiteHost, c_graphitePort, "PD42.SS" ) );
     final JmxTaskDescriptor task = defineJobDescriptor();
-    final JmxService jmxService = new JmxService( task.getService() );
+    final JmxService jmxService = new JmxService( task );
 
     final JdbcTaskDescriptor jdbcTask = defineJdbcJobDescriptor();
     final JdbcService jdbcService = new JdbcService( jdbcTask.getService() );
@@ -144,11 +139,11 @@ public class Main
       }
       final MetricSink sink =
         new MulticastMetricSink( new MetricSink[]{ graphiteService, new PrintStreamMetricSink() } );
-      for( final JmxQuery query : task.getQueries() )
+
+      final MetricValueSet poll = jmxService.poll();
+      if( null != poll )
       {
-        final LinkedList<MetricValue> metrics = new LinkedList<>();
-        collectQueryResults( metrics, jmxService.acquireConnection(), query );
-        sink.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
+        sink.handleMetrics( poll );
       }
       for( final JdbcQuery query : jdbcTask.getQueries() )
       {
@@ -276,51 +271,6 @@ public class Main
     final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
     map.put( "Service", serviceName );
     return new Namespace( map );
-  }
-
-  private static void collectQueryResults( final LinkedList<MetricValue> metrics,
-                                           final MBeanServerConnection mBeanServer,
-                                           final JmxQuery query )
-    throws Exception
-  {
-    final ObjectName objectName = query.getObjectName();
-    if( objectName.isPattern() )
-    {
-      final Set<ObjectName> objectNames = mBeanServer.queryNames( objectName, null );
-      for( final ObjectName candidate : objectNames )
-      {
-        collectQueryResults( metrics, mBeanServer, query, candidate );
-      }
-    }
-    else
-    {
-      collectQueryResults( metrics, mBeanServer, query, objectName );
-    }
-  }
-
-  private static void collectQueryResults( final LinkedList<MetricValue> metrics,
-                                           final MBeanServerConnection mBeanServer,
-                                           final JmxQuery query,
-                                           final ObjectName objectName )
-    throws Exception
-  {
-    final MBeanInfo info = mBeanServer.getMBeanInfo( objectName );
-    for( final MBeanAttributeInfo attribute : info.getAttributes() )
-    {
-      final String attributeName = attribute.getName();
-      final Set<String> attributeNames = query.getAttributeNames();
-      if( null == attributeNames ||
-          attributeNames.contains( attributeName ) )
-      {
-        final Object value = mBeanServer.getAttribute( objectName, attributeName );
-        if( value instanceof Number )
-        {
-          final MetricName name = query.generateKey( objectName, attributeName );
-          final MetricValue metricValue = new MetricValue( name, (Number) value );
-          metrics.add( metricValue );
-        }
-      }
-    }
   }
 
   private static boolean processOptions( final String[] args )
