@@ -1,37 +1,32 @@
 package org.realityforge.spydle;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileReader;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
 import org.realityforge.spydle.runtime.MetricSink;
+import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValueSet;
-import org.realityforge.spydle.runtime.MulticastMetricSink;
-import org.realityforge.spydle.runtime.Namespace;
-import org.realityforge.spydle.runtime.PrintStreamMetricSink;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.graphite.GraphiteServiceDescriptor;
-import org.realityforge.spydle.runtime.jdbc.JdbcQuery;
+import org.realityforge.spydle.runtime.jdbc.JdbcKit;
 import org.realityforge.spydle.runtime.jdbc.JdbcService;
-import org.realityforge.spydle.runtime.jdbc.JdbcServiceDescriptor;
-import org.realityforge.spydle.runtime.jdbc.JdbcTaskDescriptor;
-import org.realityforge.spydle.runtime.jmx.JmxQuery;
+import org.realityforge.spydle.runtime.jmx.JmxKit;
 import org.realityforge.spydle.runtime.jmx.JmxService;
-import org.realityforge.spydle.runtime.jmx.JmxServiceDescriptor;
-import org.realityforge.spydle.runtime.jmx.JmxTaskDescriptor;
+import org.realityforge.spydle.runtime.util.ConfigUtil;
+import org.realityforge.spydle.store.MonitorDataStore;
 
 public class Main
 {
@@ -72,7 +67,8 @@ public class Main
   private static boolean c_verbose;
   private static String c_graphiteHost = "127.0.0.1";
   private static int c_graphitePort = GraphiteServiceDescriptor.DEFAULT_PORT;
-  private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY );
+  private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY ).getAbsoluteFile();
+  private static MonitorDataStore c_dataStore = new MonitorDataStore();
 
   public static void main( final String[] args )
     throws Exception
@@ -83,6 +79,7 @@ public class Main
       return;
     }
 
+
     final WatchService watcher = FileSystems.getDefault().newWatchService();
     final Path path = c_configDirectory.toPath();
 
@@ -91,12 +88,17 @@ public class Main
                    StandardWatchEventKinds.ENTRY_DELETE,
                    StandardWatchEventKinds.ENTRY_MODIFY );
 
+    final File[] files = c_configDirectory.listFiles();
+    if( null != files )
+    {
+      for( final File file : files )
+      {
+        loadConfiguration( file );
+      }
+    }
+
     final GraphiteService graphiteService =
       new GraphiteService( new GraphiteServiceDescriptor( c_graphiteHost, c_graphitePort, "PD42.SS" ) );
-    final JmxTaskDescriptor task = defineJobDescriptor();
-    final JmxService jmxService = new JmxService( task );
-
-    final JdbcService jdbcService = new JdbcService( defineJdbcJobDescriptor() );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -110,108 +112,92 @@ public class Main
           {
             @SuppressWarnings( "unchecked" )
             final WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
+            final Path context = pathEvent.context();
+            final Path file = path.resolve( context ).toFile().getCanonicalFile().toPath();
             if( StandardWatchEventKinds.ENTRY_CREATE == kind )
             {
-              System.out.println( "File added: " + pathEvent.context().getFileName() );
+              System.out.println( "File added: " + file );
+              loadConfiguration( file.toFile() );
             }
             else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
             {
-              System.out.println( "File removed: " + pathEvent.context().getFileName() );
+              System.out.println( "File removed: " + file );
+              c_dataStore.deregisterSource( file.toString() );
             }
             else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
             {
-              System.out.println( "File modified: " + pathEvent.context().getFileName() );
+              System.out.println( "File modified: " + file );
+              loadConfiguration( file.toFile() );
             }
           }
         }
+        key.reset();
       }
-      final MetricSink sink =
-        new MulticastMetricSink( new MetricSink[]{ graphiteService, new PrintStreamMetricSink( System.out ) } );
+      c_dataStore.registerSink( "graphiteService", graphiteService );
+      //c_dataStore.registerSink( "out", new PrintStreamMetricSink( System.out ) );
 
-      MetricValueSet poll = jmxService.poll();
-      if( null != poll )
+      for( final MetricSource source : c_dataStore.sources() )
       {
-        sink.handleMetrics( poll );
-      }
-      poll = jdbcService.poll();
-      if( null != poll )
-      {
-        sink.handleMetrics( poll );
+        handleMetrics( source.poll() );
       }
       Thread.sleep( 100 );
     }
-    graphiteService.close();
-    jmxService.close();
-    jdbcService.close();
+
+    for( final MetricSink sink : c_dataStore.sinks() )
+    {
+      if( sink instanceof Closeable )
+      {
+        ( (Closeable) sink ).close();
+      }
+    }
+    for( final MetricSource source : c_dataStore.sources() )
+    {
+      if( source instanceof Closeable )
+      {
+        ( (Closeable) source ).close();
+      }
+    }
     watcher.close();
 
     System.exit( SUCCESS_EXIT_CODE );
   }
 
-
-  private static JdbcTaskDescriptor defineJdbcJobDescriptor()
+  private static void handleMetrics( final MetricValueSet metrics )
   {
-    final JdbcQuery query1 =
-      new JdbcQuery( "CALL 1", null, newNamespace( "Service1" ) );
-    final ArrayList<JdbcQuery> queries = new ArrayList<>();
-    queries.add( query1 );
-
-    final JdbcServiceDescriptor service = new JdbcServiceDescriptor( "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:aname", "sa", "" );
-    return new JdbcTaskDescriptor( service, queries );
+    if( null != metrics )
+    {
+      for( final MetricSink sink : c_dataStore.sinks() )
+      {
+        sink.handleMetrics( metrics );
+      }
+    }
   }
 
-  private static JmxTaskDescriptor defineJobDescriptor()
-    throws MalformedObjectNameException
+  private static void loadConfiguration( final File file )
   {
-    final JmxQuery query1 =
-      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
-                    null,
-                    newNamespace( "Service1" ) );
-    final HashSet<String> attributeNames = new HashSet<>();
-    attributeNames.add( "FreePhysicalMemorySize" );
-    final JmxQuery query2 =
-      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
-                    attributeNames,
-                    newNamespace( "Service2" ) );
-    final ArrayList<String> nameComponents = new ArrayList<>();
-    nameComponents.add( "type" );
-    nameComponents.add( JmxQuery.ATTRIBUTE_COMPONENT );
-    nameComponents.add( JmxQuery.DOMAIN_COMPONENT );
-    final JmxQuery query3 =
-      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
-                    attributeNames,
-                    newNamespace( "Service3" ),
-                    nameComponents );
-    final JmxQuery query4 =
-      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
-                    attributeNames,
-                    newNamespace( "Service4" ),
-                    new ArrayList<String>() );
-    final JmxQuery query5 =
-      new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
-                    null,
-                    null );
-    final JmxQuery query6 =
-      new JmxQuery( new ObjectName( "java.lang:type=*" ),
-                    null,
-                    null );
-    final ArrayList<JmxQuery> queries = new ArrayList<>();
-    queries.add( query1 );
-    queries.add( query2 );
-    queries.add( query3 );
-    queries.add( query4 );
-    queries.add( query5 );
-    queries.add( query6 );
-
-    final JmxServiceDescriptor service = new JmxServiceDescriptor( "127.0.0.1", 1105 );
-    return new JmxTaskDescriptor( service, queries );
-  }
-
-  private static Namespace newNamespace( final String serviceName )
-  {
-    final LinkedHashMap<String, String> map = new LinkedHashMap<>();
-    map.put( "Service", serviceName );
-    return new Namespace( map );
+    if( file.getName().endsWith( ".json" ) )
+    {
+      try
+      {
+        final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
+        final String type = ConfigUtil.getValue( config, "type", String.class );
+        switch( type )
+        {
+          case "jmx":
+            c_dataStore.registerSource( file.toString(), new JmxService( JmxKit.parse( config ) ) );
+            break;
+          case "jdbc":
+            c_dataStore.registerSource( file.toString(), new JdbcService( JdbcKit.parse( config ) ) );
+            break;
+          default:
+            throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
+        }
+      }
+      catch( Exception e )
+      {
+        e.printStackTrace();
+      }
+    }
   }
 
   private static boolean processOptions( final String[] args )
@@ -258,7 +244,7 @@ public class Main
         }
         case CONFIG_DIRECTORY_CONFIG_OPT:
         {
-          c_configDirectory = new File( option.getArgument() );
+          c_configDirectory = new File( option.getArgument() ).getAbsoluteFile();
           break;
         }
         case VERBOSE_OPT:
