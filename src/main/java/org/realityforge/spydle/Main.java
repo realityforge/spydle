@@ -140,19 +140,18 @@ public class Main
         }
       }
       final MetricHandler handler =
-        new MultiMetricWriter( new MetricHandler[]{ new GraphiteMetricHandler( graphiteService ),
-                                                    new PrintStreamMetricHandler() } );
+        new MultiMetricWriter( new MetricHandler[]{ graphiteService, new PrintStreamMetricHandler() } );
       for( final JmxQuery query : task.getQueries() )
       {
         final LinkedList<MetricValue> metrics = new LinkedList<>();
         collectQueryResults( metrics, jmxService.acquireConnection(), query );
-        handler.metrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
+        handler.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
       }
       for( final JdbcQuery query : jdbcTask.getQueries() )
       {
         final LinkedList<MetricValue> metrics = new LinkedList<>();
         collectJdbcQueryResults( metrics, jdbcService.acquireConnection(), query );
-        handler.metrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
+        handler.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
       }
       Thread.sleep( task.getDelay() );
     }

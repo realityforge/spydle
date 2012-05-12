@@ -8,7 +8,7 @@ import org.realityforge.spydle.runtime.MetricValueSet;
 /**
  * A simple handler used during debugging that writes to a PrintStream.
  */
-public class PrintStreamMetricHandler
+public final class PrintStreamMetricHandler
   implements MetricHandler
 {
   private final PrintStream _writer;
@@ -23,11 +23,12 @@ public class PrintStreamMetricHandler
     _writer = writer;
   }
 
-  public void metrics( final MetricValueSet metrics )
+  public boolean handleMetrics( final MetricValueSet metrics )
   {
     for( final MetricValue metric : metrics.getMetrics() )
     {
       _writer.println( metric.getName() + " = " + metric.getValue() );
     }
+    return false;
   }
 }

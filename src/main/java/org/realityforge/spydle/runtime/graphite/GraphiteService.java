@@ -8,13 +8,14 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
+import org.realityforge.spydle.MetricHandler;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
 
 public final class GraphiteService
-  implements Closeable
+  implements Closeable, MetricHandler
 {
   private static final Logger LOG = Logger.getLogger( GraphiteService.class.getName() );
 
@@ -27,7 +28,8 @@ public final class GraphiteService
     _descriptor = descriptor;
   }
 
-  public void writeMetric( final MetricValueSet metrics )
+  @Override
+  public boolean handleMetrics( final MetricValueSet metrics )
   {
     final StringBuilder sb = new StringBuilder();
     final String prefix = _descriptor.getPrefix();
@@ -58,15 +60,18 @@ public final class GraphiteService
       final OutputStream outputStream = acquireConnection();
       outputStream.write( bytes );
       outputStream.flush();
+      return true;
     }
     catch( final UnsupportedEncodingException uee )
     {
       LOG.log( Level.FINE, "Unable to convert message for graphite: " + sb, uee );
+      return false;
     }
     catch( final IOException ioe )
     {
       LOG.log( Level.FINE, "Error writing to graphite server: " + _descriptor, ioe );
       close();
+      return false;
     }
   }
 

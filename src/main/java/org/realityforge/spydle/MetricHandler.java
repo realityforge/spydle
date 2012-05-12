@@ -7,5 +7,11 @@ import org.realityforge.spydle.runtime.MetricValueSet;
  */
 public interface MetricHandler
 {
-  void metrics( MetricValueSet metric );
+  /**
+   * Interface via which to receive notification of metrics.
+   *
+   * @param metrics the set of values to handle.
+   * @return true if successfully handled metric, false otherwise.
+   */
+  boolean handleMetrics( MetricValueSet metrics );
 }

@@ -13,11 +13,13 @@ public final class MultiMetricWriter
     _handlers = handlers;
   }
 
-  public void metrics( final MetricValueSet metrics )
+  public boolean handleMetrics( final MetricValueSet metrics )
   {
+    boolean result = true;
     for( final MetricHandler handler : _handlers )
     {
-      handler.metrics( metrics );
+      result &= handler.handleMetrics( metrics );
     }
+    return result;
   }
 }
