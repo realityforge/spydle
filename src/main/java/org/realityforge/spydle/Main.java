@@ -138,7 +138,7 @@ public class Main
       {
         sink.handleMetrics( poll );
       }
-      Thread.sleep( task.getDelay() );
+      Thread.sleep( 100 );
     }
     graphiteService.close();
     jmxService.close();
@@ -204,7 +204,7 @@ public class Main
     queries.add( query6 );
 
     final JmxServiceDescriptor service = new JmxServiceDescriptor( "127.0.0.1", 1105 );
-    return new JmxTaskDescriptor( service, queries, 1000 );
+    return new JmxTaskDescriptor( service, queries );
   }
 
   private static Namespace newNamespace( final String serviceName )
