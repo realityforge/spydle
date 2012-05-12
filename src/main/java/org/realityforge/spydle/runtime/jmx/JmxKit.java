@@ -34,7 +34,7 @@ public final class JmxKit
 
     final List<JmxQuery> queries = new ArrayList<>();
 
-    final JSONArray queryArray = getValue( config, "queries", JSONArray.class );
+    final JSONArray queryArray = getValue( config, "probes", JSONArray.class );
     for( final Object queryConfig : queryArray )
     {
       queries.add( parseQuery( (JSONObject) queryConfig ) );
