@@ -120,11 +120,7 @@ public class Main
         for( final WatchEvent<?> event : key.pollEvents() )
         {
           final WatchEvent.Kind<?> kind = event.kind();
-          if( StandardWatchEventKinds.OVERFLOW == kind )
-          {
-            continue;
-          }
-          else
+          if( StandardWatchEventKinds.OVERFLOW != kind )
           {
             @SuppressWarnings( "unchecked" )
             final WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
