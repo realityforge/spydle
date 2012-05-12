@@ -64,7 +64,7 @@ public final class JmxServiceDescriptor
 
   public Map<String, ?> getEnvironment()
   {
-    final Map<String, String[]> environment = new HashMap<String, String[]>();
+    final Map<String, String[]> environment = new HashMap<>();
     if( null != getUsername() && null != getPassword() )
     {
       environment.put( JMXConnector.CREDENTIALS, new String[]{ getUsername(), getPassword() } );

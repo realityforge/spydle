@@ -39,9 +39,9 @@ public class JmxQuery
   {
     _objectName = objectName;
     _attributeNames =
-      null != attributeNames ? Collections.unmodifiableSet( new HashSet<String>( attributeNames ) ) : null;
+      null != attributeNames ? Collections.unmodifiableSet( new HashSet<>( attributeNames ) ) : null;
     _namespace = namespace;
-    _nameComponents = null != nameComponents ? Collections.unmodifiableList( new ArrayList<String>( nameComponents ) ) : null;
+    _nameComponents = null != nameComponents ? Collections.unmodifiableList( new ArrayList<>( nameComponents ) ) : null;
   }
 
   @Nonnull
@@ -81,7 +81,7 @@ public class JmxQuery
   public MetricName generateKey( @Nonnull final ObjectName objectName,
                                  @Nonnull final String attribute )
   {
-    final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+    final LinkedHashMap<String, String> map = new LinkedHashMap<>();
     final Namespace namePrefix = getNamespace();
     if( null != namePrefix )
     {

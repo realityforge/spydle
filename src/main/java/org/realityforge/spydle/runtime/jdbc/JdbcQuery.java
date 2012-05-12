@@ -44,7 +44,7 @@ public class JdbcQuery
 
   public MetricName generateKey( final String keyValue, final String columnName )
   {
-    final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+    final LinkedHashMap<String, String> map = new LinkedHashMap<>();
     final Namespace namePrefix = getNamespace();
     if( null != namePrefix )
     {

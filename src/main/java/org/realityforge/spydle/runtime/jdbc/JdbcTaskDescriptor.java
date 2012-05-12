@@ -19,7 +19,7 @@ public class JdbcTaskDescriptor
                              final long delay )
   {
     _service = service;
-    _queries = Collections.unmodifiableList( new ArrayList<JdbcQuery>( queries ) );
+    _queries = Collections.unmodifiableList( new ArrayList<>( queries ) );
     _delay = delay;
   }
 

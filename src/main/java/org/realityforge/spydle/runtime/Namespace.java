@@ -16,7 +16,7 @@ public final class Namespace
   public Namespace( @Nonnull final LinkedHashMap<String, String> nameComponents )
   {
     assert null != nameComponents;
-    _nameComponents = Collections.unmodifiableMap( new LinkedHashMap<String, String>( nameComponents ) );
+    _nameComponents = Collections.unmodifiableMap( new LinkedHashMap<>( nameComponents ) );
   }
 
   @Nonnull

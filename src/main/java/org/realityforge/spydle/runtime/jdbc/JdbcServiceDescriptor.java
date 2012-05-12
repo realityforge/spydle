@@ -15,11 +15,6 @@ public class JdbcServiceDescriptor
   @Nullable
   private final String _password;
 
-  public JdbcServiceDescriptor( @Nonnull final String jdbcDriver, @Nonnull final String jdbcURL )
-  {
-    this( jdbcDriver, jdbcURL, null, null );
-  }
-
   public JdbcServiceDescriptor( @Nonnull final String jdbcDriver,
                                 @Nonnull final String jdbcURL,
                                 @Nullable final String username,
