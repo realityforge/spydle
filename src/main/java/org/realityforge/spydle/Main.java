@@ -1,26 +1,16 @@
 package org.realityforge.spydle;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.realityforge.cli.CLArgsParser;
@@ -35,7 +25,6 @@ import org.realityforge.spydle.descriptors.jmx.JmxQuery;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.runtime.MetricSink;
-import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.MulticastMetricSink;
 import org.realityforge.spydle.runtime.Namespace;
@@ -107,8 +96,7 @@ public class Main
     final JmxTaskDescriptor task = defineJobDescriptor();
     final JmxService jmxService = new JmxService( task );
 
-    final JdbcTaskDescriptor jdbcTask = defineJdbcJobDescriptor();
-    final JdbcService jdbcService = new JdbcService( jdbcTask.getService() );
+    final JdbcService jdbcService = new JdbcService( defineJdbcJobDescriptor() );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -140,16 +128,15 @@ public class Main
       final MetricSink sink =
         new MulticastMetricSink( new MetricSink[]{ graphiteService, new PrintStreamMetricSink() } );
 
-      final MetricValueSet poll = jmxService.poll();
+      MetricValueSet poll = jmxService.poll();
       if( null != poll )
       {
         sink.handleMetrics( poll );
       }
-      for( final JdbcQuery query : jdbcTask.getQueries() )
+      poll = jdbcService.poll();
+      if( null != poll )
       {
-        final LinkedList<MetricValue> metrics = new LinkedList<>();
-        collectJdbcQueryResults( metrics, jdbcService.acquireConnection(), query );
-        sink.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
+        sink.handleMetrics( poll );
       }
       Thread.sleep( task.getDelay() );
     }
@@ -161,52 +148,6 @@ public class Main
     System.exit( SUCCESS_EXIT_CODE );
   }
 
-  private static void collectJdbcQueryResults( final LinkedList<MetricValue> metrics,
-                                               final Connection connection,
-                                               final JdbcQuery query )
-    throws SQLException, IOException
-  {
-    final Statement statement = connection.createStatement();
-    final ResultSet resultSet = statement.executeQuery( query.getQuery() );
-    final HashMap<String, Integer> columns = new HashMap<>();
-    final ResultSetMetaData metaData = resultSet.getMetaData();
-    final int columnCount = metaData.getColumnCount();
-    for( int i = 1; i <= columnCount; i++ )
-    {
-      final int columnType = metaData.getColumnType( i );
-      if( Types.TINYINT == columnType ||
-          Types.DECIMAL == columnType ||
-          Types.DOUBLE == columnType ||
-          Types.FLOAT == columnType ||
-          Types.INTEGER == columnType ||
-          Types.SMALLINT == columnType ||
-          Types.NUMERIC == columnType ||
-          Types.BIGINT == columnType )
-      {
-        columns.put( metaData.getColumnName( i ), i );
-      }
-    }
-    while( resultSet.next() )
-    {
-      final String key;
-      if( null != query.getKeyColumn() )
-      {
-        key = resultSet.getObject( query.getKeyColumn() ).toString();
-      }
-      else
-      {
-        key = null;
-      }
-      for( final Map.Entry<String, Integer> entry : columns.entrySet() )
-      {
-        final String columnName = entry.getKey();
-        final Object value = resultSet.getObject( columnName );
-        metrics.add( new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value ) );
-      }
-    }
-    resultSet.close();
-    statement.close();
-  }
 
   private static JdbcTaskDescriptor defineJdbcJobDescriptor()
   {
