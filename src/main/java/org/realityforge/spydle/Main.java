@@ -297,8 +297,10 @@ public class Main
           return false;
         }
         case HOST_CONFIG_OPT:
+        {
           c_graphiteHost = option.getArgument();
           break;
+        }
         case PORT_CONFIG_OPT:
         {
           final String port = option.getArgument();
