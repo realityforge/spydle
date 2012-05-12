@@ -10,6 +10,7 @@ define('spydle') do
 
   compile.with :javax_annotation,
                :spice_cli,
+               :json_simple,
                :hsqldb
 
   package(:jar)
