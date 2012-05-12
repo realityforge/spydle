@@ -1,4 +1,4 @@
-package org.realityforge.spydle.descriptors.graphite;
+package org.realityforge.spydle.runtime.graphite;
 
 import java.net.InetSocketAddress;
 import javax.annotation.Nonnull;

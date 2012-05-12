@@ -17,21 +17,21 @@ import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
-import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
-import org.realityforge.spydle.descriptors.jdbc.JdbcQuery;
-import org.realityforge.spydle.descriptors.jdbc.JdbcServiceDescriptor;
-import org.realityforge.spydle.descriptors.jdbc.JdbcTaskDescriptor;
-import org.realityforge.spydle.descriptors.jmx.JmxQuery;
-import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
-import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.MulticastMetricSink;
 import org.realityforge.spydle.runtime.Namespace;
 import org.realityforge.spydle.runtime.PrintStreamMetricSink;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
+import org.realityforge.spydle.runtime.graphite.GraphiteServiceDescriptor;
+import org.realityforge.spydle.runtime.jdbc.JdbcQuery;
 import org.realityforge.spydle.runtime.jdbc.JdbcService;
+import org.realityforge.spydle.runtime.jdbc.JdbcServiceDescriptor;
+import org.realityforge.spydle.runtime.jdbc.JdbcTaskDescriptor;
+import org.realityforge.spydle.runtime.jmx.JmxQuery;
 import org.realityforge.spydle.runtime.jmx.JmxService;
+import org.realityforge.spydle.runtime.jmx.JmxServiceDescriptor;
+import org.realityforge.spydle.runtime.jmx.JmxTaskDescriptor;
 
 public class Main
 {

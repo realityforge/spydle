@@ -8,9 +8,8 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.runtime.MetricSink;
-import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
+import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
 

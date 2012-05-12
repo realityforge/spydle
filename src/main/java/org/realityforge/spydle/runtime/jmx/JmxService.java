@@ -15,8 +15,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import org.realityforge.spydle.descriptors.jmx.JmxQuery;
-import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValue;

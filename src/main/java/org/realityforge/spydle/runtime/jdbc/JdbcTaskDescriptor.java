@@ -1,11 +1,9 @@
-package org.realityforge.spydle.descriptors.jdbc;
+package org.realityforge.spydle.runtime.jdbc;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.descriptors.jmx.JmxQuery;
-import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 
 /**
  * Describes a batch of queries against a service invoked with a set delay between queries.

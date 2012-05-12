@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.descriptors.jdbc.JdbcQuery;
-import org.realityforge.spydle.descriptors.jdbc.JdbcTaskDescriptor;
 import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;

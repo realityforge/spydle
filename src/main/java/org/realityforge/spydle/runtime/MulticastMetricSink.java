@@ -1,8 +1,6 @@
 package org.realityforge.spydle.runtime;
 
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.runtime.MetricSink;
-import org.realityforge.spydle.runtime.MetricValueSet;
 
 public final class MulticastMetricSink
   implements MetricSink

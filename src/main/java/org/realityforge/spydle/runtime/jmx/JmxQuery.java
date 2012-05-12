@@ -1,4 +1,4 @@
-package org.realityforge.spydle.descriptors.jmx;
+package org.realityforge.spydle.runtime.jmx;
 
 import java.util.ArrayList;
 import java.util.Collections;
