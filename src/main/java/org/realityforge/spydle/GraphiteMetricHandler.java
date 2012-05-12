@@ -20,7 +20,6 @@ public final class GraphiteMetricHandler
   }
 
   public void metrics( final MetricValueSet metrics )
-    throws IOException
   {
     _graphiteService.writeMetric( metrics );
   }

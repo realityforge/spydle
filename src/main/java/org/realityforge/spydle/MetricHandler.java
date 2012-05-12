@@ -1,7 +1,5 @@
 package org.realityforge.spydle;
 
-import java.io.IOException;
-import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
 
 /**
@@ -9,6 +7,5 @@ import org.realityforge.spydle.runtime.MetricValueSet;
  */
 public interface MetricHandler
 {
-  void metrics( MetricValueSet metric )
-    throws IOException;
+  void metrics( MetricValueSet metric );
 }

@@ -1,6 +1,5 @@
 package org.realityforge.spydle;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.runtime.MetricValue;
@@ -25,7 +24,6 @@ public class PrintStreamMetricHandler
   }
 
   public void metrics( final MetricValueSet metrics )
-    throws IOException
   {
     for( final MetricValue metric : metrics.getMetrics() )
     {
