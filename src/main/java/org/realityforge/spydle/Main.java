@@ -117,7 +117,7 @@ public class Main
   {
     final Statement statement = connection.createStatement();
     final ResultSet resultSet = statement.executeQuery( query.getQuery() );
-    final HashMap<String, Integer> columns = new HashMap<String, Integer>();
+    final HashMap<String, Integer> columns = new HashMap<>();
     final ResultSetMetaData metaData = resultSet.getMetaData();
     final int columnCount = metaData.getColumnCount();
     for( int i = 1; i <= columnCount; i++ )
@@ -163,7 +163,7 @@ public class Main
   {
     final JdbcQuery query1 =
       new JdbcQuery( "CALL 1", null, newNamespace( "Service1" ) );
-    final ArrayList<JdbcQuery> queries = new ArrayList<JdbcQuery>();
+    final ArrayList<JdbcQuery> queries = new ArrayList<>();
     queries.add( query1 );
 
     final JdbcServiceDescriptor service = new JdbcServiceDescriptor( "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:aname", "sa", "" );
@@ -177,13 +177,13 @@ public class Main
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     null,
                     newNamespace( "Service1" ) );
-    final HashSet<String> attributeNames = new HashSet<String>();
+    final HashSet<String> attributeNames = new HashSet<>();
     attributeNames.add( "FreePhysicalMemorySize" );
     final JmxQuery query2 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     attributeNames,
                     newNamespace( "Service2" ) );
-    final ArrayList<String> nameComponents = new ArrayList<String>();
+    final ArrayList<String> nameComponents = new ArrayList<>();
     nameComponents.add( "type" );
     nameComponents.add( JmxQuery.ATTRIBUTE_COMPONENT );
     nameComponents.add( JmxQuery.DOMAIN_COMPONENT );
@@ -205,7 +205,7 @@ public class Main
       new JmxQuery( new ObjectName( "java.lang:type=*" ),
                     null,
                     null );
-    final ArrayList<JmxQuery> queries = new ArrayList<JmxQuery>();
+    final ArrayList<JmxQuery> queries = new ArrayList<>();
     queries.add( query1 );
     queries.add( query2 );
     queries.add( query3 );
