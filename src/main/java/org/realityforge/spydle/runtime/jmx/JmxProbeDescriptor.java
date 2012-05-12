@@ -27,13 +27,6 @@ public class JmxProbeDescriptor
 
   public JmxProbeDescriptor( @Nonnull final ObjectName objectName,
                              @Nullable final Set<String> attributeNames,
-                             @Nullable final Namespace namespace )
-  {
-    this( objectName, attributeNames, namespace, null );
-  }
-
-  public JmxProbeDescriptor( @Nonnull final ObjectName objectName,
-                             @Nullable final Set<String> attributeNames,
                              @Nullable final Namespace namespace,
                              @Nullable final List<String> nameComponents )
   {
