@@ -1,6 +1,6 @@
 package org.realityforge.spydle.runtime;
 
-import org.realityforge.spydle.runtime.MetricValueSet;
+import javax.annotation.Nonnull;
 
 /**
  * The interface invoked when a metric is received by the monitoring system.
@@ -13,5 +13,5 @@ public interface MetricSink
    * @param metrics the set of values to handle.
    * @return true if successfully handled metric, false otherwise.
    */
-  boolean handleMetrics( MetricValueSet metrics );
+  boolean handleMetrics( @Nonnull MetricValueSet metrics );
 }

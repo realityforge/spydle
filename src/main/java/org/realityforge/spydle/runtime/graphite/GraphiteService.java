@@ -29,7 +29,7 @@ public final class GraphiteService
   }
 
   @Override
-  public boolean handleMetrics( final MetricValueSet metrics )
+  public boolean handleMetrics( @Nonnull final MetricValueSet metrics )
   {
     final StringBuilder sb = new StringBuilder();
     final String prefix = _descriptor.getPrefix();

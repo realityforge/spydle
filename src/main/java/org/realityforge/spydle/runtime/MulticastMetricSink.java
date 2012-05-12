@@ -14,7 +14,7 @@ public final class MulticastMetricSink
     _sinks = sinks;
   }
 
-  public boolean handleMetrics( final MetricValueSet metrics )
+  public boolean handleMetrics( @Nonnull final MetricValueSet metrics )
   {
     boolean result = true;
     for( final MetricSink sink : _sinks )

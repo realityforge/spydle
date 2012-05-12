@@ -21,7 +21,7 @@ public final class PrintStreamMetricSink
     _writer = writer;
   }
 
-  public boolean handleMetrics( final MetricValueSet metrics )
+  public boolean handleMetrics( @Nonnull final MetricValueSet metrics )
   {
     for( final MetricValue metric : metrics.getMetrics() )
     {
