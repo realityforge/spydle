@@ -8,14 +8,14 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.MetricHandler;
+import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
 
 public final class GraphiteService
-  implements Closeable, MetricHandler
+  implements Closeable, MetricSink
 {
   private static final Logger LOG = Logger.getLogger( GraphiteService.class.getName() );
 

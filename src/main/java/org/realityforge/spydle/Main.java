@@ -38,10 +38,13 @@ import org.realityforge.spydle.descriptors.jdbc.JdbcTaskDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxQuery;
 import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
+import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
 import org.realityforge.spydle.runtime.MetricValueSet;
+import org.realityforge.spydle.runtime.MulticastMetricSink;
 import org.realityforge.spydle.runtime.Namespace;
+import org.realityforge.spydle.runtime.PrintStreamMetricSink;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jdbc.JdbcService;
 import org.realityforge.spydle.runtime.jmx.JmxService;
@@ -139,19 +142,19 @@ public class Main
           }
         }
       }
-      final MetricHandler handler =
-        new MultiMetricWriter( new MetricHandler[]{ graphiteService, new PrintStreamMetricHandler() } );
+      final MetricSink sink =
+        new MulticastMetricSink( new MetricSink[]{ graphiteService, new PrintStreamMetricSink() } );
       for( final JmxQuery query : task.getQueries() )
       {
         final LinkedList<MetricValue> metrics = new LinkedList<>();
         collectQueryResults( metrics, jmxService.acquireConnection(), query );
-        handler.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
+        sink.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
       }
       for( final JdbcQuery query : jdbcTask.getQueries() )
       {
         final LinkedList<MetricValue> metrics = new LinkedList<>();
         collectJdbcQueryResults( metrics, jdbcService.acquireConnection(), query );
-        handler.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
+        sink.handleMetrics( new MetricValueSet( metrics, System.currentTimeMillis() ) );
       }
       Thread.sleep( task.getDelay() );
     }

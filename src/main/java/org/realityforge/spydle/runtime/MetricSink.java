@@ -1,11 +1,11 @@
-package org.realityforge.spydle;
+package org.realityforge.spydle.runtime;
 
 import org.realityforge.spydle.runtime.MetricValueSet;
 
 /**
  * The interface invoked when a metric is received by the monitoring system.
  */
-public interface MetricHandler
+public interface MetricSink
 {
   /**
    * Interface via which to receive notification of metrics.
