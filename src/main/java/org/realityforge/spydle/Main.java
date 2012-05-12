@@ -1,7 +1,6 @@
 package org.realityforge.spydle;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
