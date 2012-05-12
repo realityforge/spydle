@@ -26,25 +26,25 @@ public final class JdbcKit
     final String username = ConfigUtil.getValue( config, "username", String.class, false );
     final String password = ConfigUtil.getValue( config, "password", String.class, false );
 
-    final JdbcServiceDescriptor serviceDescriptor = new JdbcServiceDescriptor( driver, jdbcUrl, username, password );
+    final JdbcConnectionDescriptor connectionDescriptor = new JdbcConnectionDescriptor( driver, jdbcUrl, username, password );
 
-    final List<JdbcQuery> queries = new ArrayList<>();
+    final List<JdbcProbeDescriptor> probes = new ArrayList<>();
 
     final JSONArray queryArray = ConfigUtil.getValue( config, "probes", JSONArray.class );
     for( final Object queryConfig : queryArray )
     {
-      queries.add( parseQuery( (JSONObject) queryConfig ) );
+      probes.add( parseQuery( (JSONObject) queryConfig ) );
     }
 
-    return new JdbcTaskDescriptor( serviceDescriptor, queries );
+    return new JdbcTaskDescriptor( connectionDescriptor, probes );
   }
 
-  private static JdbcQuery parseQuery( final JSONObject config )
+  private static JdbcProbeDescriptor parseQuery( final JSONObject config )
     throws MalformedObjectNameException
   {
     final String query = ConfigUtil.getValue( config, "query", String.class );
     final String keyColumn = ConfigUtil.getValue( config, "key_column", String.class, false );
     final Namespace namespace = ConfigUtil.parseNamespace( config );
-    return new JdbcQuery( query, keyColumn, namespace );
+    return new JdbcProbeDescriptor( query, keyColumn, namespace );
   }
 }

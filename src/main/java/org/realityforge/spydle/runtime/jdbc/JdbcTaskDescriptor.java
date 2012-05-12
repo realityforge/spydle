@@ -10,23 +10,23 @@ import javax.annotation.Nonnull;
  */
 public class JdbcTaskDescriptor
 {
-  private final JdbcServiceDescriptor _service;
-  private final List<JdbcQuery> _queries;
+  private final JdbcConnectionDescriptor _connection;
+  private final List<JdbcProbeDescriptor> _probes;
 
-  public JdbcTaskDescriptor( @Nonnull final JdbcServiceDescriptor service,
-                             @Nonnull final List<JdbcQuery> queries )
+  public JdbcTaskDescriptor( @Nonnull final JdbcConnectionDescriptor connection,
+                             @Nonnull final List<JdbcProbeDescriptor> probes )
   {
-    _service = service;
-    _queries = Collections.unmodifiableList( new ArrayList<>( queries ) );
+    _connection = connection;
+    _probes = Collections.unmodifiableList( new ArrayList<>( probes ) );
   }
 
-  public JdbcServiceDescriptor getService()
+  public JdbcConnectionDescriptor getConnection()
   {
-    return _service;
+    return _connection;
   }
 
-  public List<JdbcQuery> getQueries()
+  public List<JdbcProbeDescriptor> getProbes()
   {
-    return _queries;
+    return _probes;
   }
 }

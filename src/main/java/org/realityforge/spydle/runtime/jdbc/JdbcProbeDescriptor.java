@@ -9,15 +9,15 @@ import org.realityforge.spydle.runtime.Namespace;
 /**
  * A description of a query to run against a JDBC service.
  */
-public class JdbcQuery
+public class JdbcProbeDescriptor
 {
   private final String _query;
   private final String _keyColumn;
   private final Namespace _namespace;
 
-  public JdbcQuery( @Nonnull final String query,
-                    @Nullable final String keyColumn,
-                    @Nullable final Namespace namespace )
+  public JdbcProbeDescriptor( @Nonnull final String query,
+                              @Nullable final String keyColumn,
+                              @Nullable final Namespace namespace )
   {
     _query = query;
     _keyColumn = keyColumn;

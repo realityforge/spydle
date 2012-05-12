@@ -49,16 +49,16 @@ public final class JdbcService
     {
       try
       {
-        Class.forName( _descriptor.getService().getJdbcDriver() );
+        Class.forName( _descriptor.getConnection().getJdbcDriver() );
       }
       catch( ClassNotFoundException e )
       {
-        throw new IllegalStateException( "Missing or invalid JDBC Driver: " + _descriptor.getService().getJdbcDriver() );
+        throw new IllegalStateException( "Missing or invalid JDBC Driver: " + _descriptor.getConnection().getJdbcDriver() );
       }
       _connection =
-        DriverManager.getConnection( _descriptor.getService().getJdbcURL(),
-                                     _descriptor.getService().getUsername(),
-                                     _descriptor.getService().getPassword() );
+        DriverManager.getConnection( _descriptor.getConnection().getJdbcURL(),
+                                     _descriptor.getConnection().getUsername(),
+                                     _descriptor.getConnection().getPassword() );
     }
     return _connection;
   }
@@ -89,15 +89,15 @@ public final class JdbcService
   public MetricValueSet poll()
   {
     final LinkedList<MetricValue> metrics = new LinkedList<>();
-    for( final JdbcQuery query : _descriptor.getQueries() )
+    for( final JdbcProbeDescriptor probe : _descriptor.getProbes() )
     {
       try
       {
-        collectJdbcQueryResults( metrics, acquireConnection(), query );
+        collectJdbcQueryResults( metrics, acquireConnection(), probe );
       }
       catch( final Exception e )
       {
-        LOG.log( Level.FINE, "Error querying MBeanServer: " + _descriptor.getService() + " Query: " + query, e );
+        LOG.log( Level.FINE, "Error querying MBeanServer: " + _descriptor.getConnection() + " Query: " + probe, e );
         doClose();
         return null;
       }
@@ -109,12 +109,12 @@ public final class JdbcService
 
   private void collectJdbcQueryResults( final LinkedList<MetricValue> metrics,
                                         final Connection connection,
-                                        final JdbcQuery query )
+                                        final JdbcProbeDescriptor probe )
     throws SQLException, IOException
   {
     //TODO: Gracefully handle SQL exceptions and close resources correctly
     final Statement statement = connection.createStatement();
-    final ResultSet resultSet = statement.executeQuery( query.getQuery() );
+    final ResultSet resultSet = statement.executeQuery( probe.getQuery() );
     final HashMap<String, Integer> columns = new HashMap<>();
     final ResultSetMetaData metaData = resultSet.getMetaData();
     final int columnCount = metaData.getColumnCount();
@@ -136,9 +136,9 @@ public final class JdbcService
     while( resultSet.next() )
     {
       final String key;
-      if( null != query.getKeyColumn() )
+      if( null != probe.getKeyColumn() )
       {
-        key = resultSet.getObject( query.getKeyColumn() ).toString();
+        key = resultSet.getObject( probe.getKeyColumn() ).toString();
       }
       else
       {
@@ -148,7 +148,7 @@ public final class JdbcService
       {
         final String columnName = entry.getKey();
         final Object value = resultSet.getObject( columnName );
-        metrics.add( new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value ) );
+        metrics.add( new MetricValue( probe.generateKey( key, entry.getKey() ), (Number) value ) );
       }
     }
     resultSet.close();

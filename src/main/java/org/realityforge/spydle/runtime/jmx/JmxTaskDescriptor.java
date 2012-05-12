@@ -10,23 +10,23 @@ import javax.annotation.Nonnull;
  */
 public final class JmxTaskDescriptor
 {
-  private final JmxServiceDescriptor _service;
-  private final List<JmxQuery> _queries;
+  private final JmxConnectionDescriptor _connection;
+  private final List<JmxProbeDescriptor> _probes;
 
-  public JmxTaskDescriptor( @Nonnull final JmxServiceDescriptor service,
-                            @Nonnull final List<JmxQuery> queries )
+  public JmxTaskDescriptor( @Nonnull final JmxConnectionDescriptor connection,
+                            @Nonnull final List<JmxProbeDescriptor> probes )
   {
-    _service = service;
-    _queries = Collections.unmodifiableList( new ArrayList<>( queries ) );
+    _connection = connection;
+    _probes = Collections.unmodifiableList( new ArrayList<>( probes ) );
   }
 
-  public JmxServiceDescriptor getService()
+  public JmxConnectionDescriptor getConnection()
   {
-    return _service;
+    return _connection;
   }
 
-  public List<JmxQuery> getQueries()
+  public List<JmxProbeDescriptor> getProbes()
   {
-    return _queries;
+    return _probes;
   }
 }

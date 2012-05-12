@@ -15,7 +15,7 @@ import org.realityforge.spydle.runtime.Namespace;
 /**
  * A description of a query to run against a JMX service.
  */
-public class JmxQuery
+public class JmxProbeDescriptor
 {
   public static final String DOMAIN_COMPONENT = "DOMAIN";
   public static final String ATTRIBUTE_COMPONENT = "ATTRIBUTE";
@@ -25,17 +25,17 @@ public class JmxQuery
   private final Set<String> _attributeNames;
   private final List<String> _nameComponents;
 
-  public JmxQuery( @Nonnull final ObjectName objectName,
-                   @Nullable final Set<String> attributeNames,
-                   @Nullable final Namespace namespace )
+  public JmxProbeDescriptor( @Nonnull final ObjectName objectName,
+                             @Nullable final Set<String> attributeNames,
+                             @Nullable final Namespace namespace )
   {
     this( objectName, attributeNames, namespace, null );
   }
 
-  public JmxQuery( @Nonnull final ObjectName objectName,
-                   @Nullable final Set<String> attributeNames,
-                   @Nullable final Namespace namespace,
-                   @Nullable final List<String> nameComponents )
+  public JmxProbeDescriptor( @Nonnull final ObjectName objectName,
+                             @Nullable final Set<String> attributeNames,
+                             @Nullable final Namespace namespace,
+                             @Nullable final List<String> nameComponents )
   {
     _objectName = objectName;
     _attributeNames =

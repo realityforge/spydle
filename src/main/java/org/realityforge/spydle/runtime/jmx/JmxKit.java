@@ -28,20 +28,20 @@ public final class JmxKit
     final String username = ConfigUtil.getValue( config, "username", String.class, false );
     final String password = ConfigUtil.getValue( config, "password", String.class, false );
 
-    final JmxServiceDescriptor serviceDescriptor = new JmxServiceDescriptor( host, port, username, password );
+    final JmxConnectionDescriptor connectionDescriptor = new JmxConnectionDescriptor( host, port, username, password );
 
-    final List<JmxQuery> queries = new ArrayList<>();
+    final List<JmxProbeDescriptor> probes = new ArrayList<>();
 
     final JSONArray queryArray = ConfigUtil.getValue( config, "probes", JSONArray.class );
     for( final Object queryConfig : queryArray )
     {
-      queries.add( parseQuery( (JSONObject) queryConfig ) );
+      probes.add( parseQuery( (JSONObject) queryConfig ) );
     }
 
-    return new JmxTaskDescriptor( serviceDescriptor, queries );
+    return new JmxTaskDescriptor( connectionDescriptor, probes );
   }
 
-  private static JmxQuery parseQuery( final JSONObject config )
+  private static JmxProbeDescriptor parseQuery( final JSONObject config )
     throws MalformedObjectNameException
   {
     final String objectName = ConfigUtil.getValue( config, "object_name", String.class );
@@ -61,6 +61,6 @@ public final class JmxKit
     }
     final Namespace namespace = ConfigUtil.parseNamespace( config );
     final ArrayList<String> nameComponents = new ArrayList<>();
-    return new JmxQuery( new ObjectName( objectName ), attributeNames, namespace, nameComponents );
+    return new JmxProbeDescriptor( new ObjectName( objectName ), attributeNames, namespace, nameComponents );
   }
 }

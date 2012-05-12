@@ -56,8 +56,8 @@ public final class JmxService
     }
     if( null == _connector )
     {
-      final JMXServiceURL url = new JMXServiceURL( _descriptor.getService().getURL() );
-      _connector = JMXConnectorFactory.connect( url, _descriptor.getService().getEnvironment() );
+      final JMXServiceURL url = new JMXServiceURL( _descriptor.getConnection().getURL() );
+      _connector = JMXConnectorFactory.connect( url, _descriptor.getConnection().getEnvironment() );
     }
     return _connector.getMBeanServerConnection();
   }
@@ -89,15 +89,15 @@ public final class JmxService
   public MetricValueSet poll()
   {
     final LinkedList<MetricValue> metrics = new LinkedList<>();
-    for( final JmxQuery query : _descriptor.getQueries() )
+    for( final JmxProbeDescriptor probe : _descriptor.getProbes() )
     {
       try
       {
-        collectQueryResults( metrics, acquireConnection(), query );
+        collectQueryResults( metrics, acquireConnection(), probe );
       }
       catch( final Exception e )
       {
-        LOG.log( Level.FINE, "Error querying MBeanServer: " + _descriptor.getService() + " Query: " + query, e );
+        LOG.log( Level.FINE, "Error querying MBeanServer: " + _descriptor.getConnection() + " Query: " + probe, e );
         doClose();
         return null;
       }
@@ -109,27 +109,27 @@ public final class JmxService
 
   private void collectQueryResults( final LinkedList<MetricValue> metrics,
                                     final MBeanServerConnection mBeanServer,
-                                    final JmxQuery query )
+                                    final JmxProbeDescriptor probe )
     throws Exception
   {
-    final ObjectName objectName = query.getObjectName();
+    final ObjectName objectName = probe.getObjectName();
     if( objectName.isPattern() )
     {
       final Set<ObjectName> objectNames = mBeanServer.queryNames( objectName, null );
       for( final ObjectName candidate : objectNames )
       {
-        collectQueryResults( metrics, mBeanServer, query, candidate );
+        collectQueryResults( metrics, mBeanServer, probe, candidate );
       }
     }
     else
     {
-      collectQueryResults( metrics, mBeanServer, query, objectName );
+      collectQueryResults( metrics, mBeanServer, probe, objectName );
     }
   }
 
   private void collectQueryResults( final LinkedList<MetricValue> metrics,
                                     final MBeanServerConnection mBeanServer,
-                                    final JmxQuery query,
+                                    final JmxProbeDescriptor probe,
                                     final ObjectName objectName )
     throws Exception
   {
@@ -137,14 +137,14 @@ public final class JmxService
     for( final MBeanAttributeInfo attribute : info.getAttributes() )
     {
       final String attributeName = attribute.getName();
-      final Set<String> attributeNames = query.getAttributeNames();
+      final Set<String> attributeNames = probe.getAttributeNames();
       if( null == attributeNames ||
           attributeNames.contains( attributeName ) )
       {
         final Object value = mBeanServer.getAttribute( objectName, attributeName );
         if( value instanceof Number )
         {
-          final MetricName name = query.generateKey( objectName, attributeName );
+          final MetricName name = probe.generateKey( objectName, attributeName );
           final MetricValue metricValue = new MetricValue( name, (Number) value );
           metrics.add( metricValue );
         }

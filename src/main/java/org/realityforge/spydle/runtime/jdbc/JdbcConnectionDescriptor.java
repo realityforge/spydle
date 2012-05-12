@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 /**
  * A descriptor describing how to access a JDBC service.
  */
-public class JdbcServiceDescriptor
+public class JdbcConnectionDescriptor
 {
   private final String _jdbcDriver;
   private final String _jdbcURL;
@@ -15,10 +15,10 @@ public class JdbcServiceDescriptor
   @Nullable
   private final String _password;
 
-  public JdbcServiceDescriptor( @Nonnull final String jdbcDriver,
-                                @Nonnull final String jdbcURL,
-                                @Nullable final String username,
-                                @Nullable final String password )
+  public JdbcConnectionDescriptor( @Nonnull final String jdbcDriver,
+                                   @Nonnull final String jdbcURL,
+                                   @Nullable final String username,
+                                   @Nullable final String password )
   {
     _jdbcDriver = jdbcDriver;
     _jdbcURL = jdbcURL;

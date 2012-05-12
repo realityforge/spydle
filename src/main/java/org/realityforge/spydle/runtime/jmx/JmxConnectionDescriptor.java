@@ -9,7 +9,7 @@ import javax.management.remote.JMXConnector;
 /**
  * A descriptor describing how to access a JMX service.
  */
-public final class JmxServiceDescriptor
+public final class JmxConnectionDescriptor
 {
   private final String _host;
   private final int _port;
@@ -18,10 +18,10 @@ public final class JmxServiceDescriptor
   @Nullable
   private final String _password;
 
-  public JmxServiceDescriptor( @Nonnull final String host,
-                               final int port,
-                               @Nullable final String username,
-                               @Nullable final String password )
+  public JmxConnectionDescriptor( @Nonnull final String host,
+                                  final int port,
+                                  @Nullable final String username,
+                                  @Nullable final String password )
   {
     _host = host;
     _port = port;
@@ -29,7 +29,7 @@ public final class JmxServiceDescriptor
     _password = password;
   }
 
-  public JmxServiceDescriptor( @Nonnull final String host, final int port )
+  public JmxConnectionDescriptor( @Nonnull final String host, final int port )
   {
     this( host, port, null, null );
   }
