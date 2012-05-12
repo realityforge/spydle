@@ -189,7 +189,7 @@ public class Main
     final JmxQuery query3 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
                     attributeNames,
-                    newNamespace( "Service3"),
+                    newNamespace( "Service3" ),
                     nameComponents );
     final JmxQuery query4 =
       new JmxQuery( new ObjectName( "java.lang:type=OperatingSystem" ),
