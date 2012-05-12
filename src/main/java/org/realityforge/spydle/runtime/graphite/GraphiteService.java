@@ -3,7 +3,10 @@ package org.realityforge.spydle.runtime.graphite;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
@@ -13,6 +16,8 @@ import org.realityforge.spydle.runtime.MetricValueSet;
 public final class GraphiteService
   implements Closeable
 {
+  private static final Logger LOG = Logger.getLogger( GraphiteService.class.getName() );
+
   private final GraphiteServiceDescriptor _descriptor;
   private OutputStream _outputStream;
   private Socket _socket;
@@ -23,7 +28,6 @@ public final class GraphiteService
   }
 
   public void writeMetric( final MetricValueSet metrics )
-    throws IOException
   {
     final StringBuilder sb = new StringBuilder();
     final String prefix = _descriptor.getPrefix();
@@ -48,7 +52,22 @@ public final class GraphiteService
       sb.append( '\n' );
     }
 
-    acquireConnection().write( sb.toString().getBytes( "US-ASCII" ) );
+    try
+    {
+      final byte[] bytes = sb.toString().getBytes( "US-ASCII" );
+      final OutputStream outputStream = acquireConnection();
+      outputStream.write( bytes );
+      outputStream.flush();
+    }
+    catch( final UnsupportedEncodingException uee )
+    {
+      LOG.log( Level.FINE, "Unable to convert message for graphite: " + sb, uee );
+    }
+    catch( final IOException ioe )
+    {
+      LOG.log( Level.FINE, "Error writing to graphite server: " + _descriptor, ioe );
+      close();
+    }
   }
 
   private OutputStream acquireConnection()
@@ -74,8 +93,9 @@ public final class GraphiteService
     }
     if( null == _socket )
     {
-      _socket = new Socket();
-      _socket.connect( _descriptor.getSocketAddress() );
+      final Socket socket = new Socket();
+      socket.connect( _descriptor.getSocketAddress() );
+      _socket = socket;
     }
     return _socket.getOutputStream();
   }
