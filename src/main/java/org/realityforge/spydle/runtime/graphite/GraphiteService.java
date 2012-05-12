@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
+import org.realityforge.spydle.runtime.MetricValueSet;
 
 public final class GraphiteService
   implements Closeable
@@ -21,26 +22,32 @@ public final class GraphiteService
     _descriptor = descriptor;
   }
 
-  public void writeMetric( final MetricValue metric )
+  public void writeMetric( final MetricValueSet metrics )
     throws IOException
   {
     final StringBuilder sb = new StringBuilder();
     final String prefix = _descriptor.getPrefix();
-    if( null != prefix )
+
+    for( final MetricValue metric : metrics.getMetrics() )
     {
-      sb.append( prefix );
-      if( sb.length() > 0 )
+      if( null != prefix )
       {
-        sb.append( '.' );
+        sb.append( prefix );
+        if( sb.length() > 0 )
+        {
+          sb.append( '.' );
+        }
       }
+
+      final MetricName name = metric.getName();
+      sb.append( name.getNamespace().toString().replace( '.', '_' ).replace( ',', '.' ) + '.' + name.getKey() );
+      sb.append( ' ' );
+      sb.append( metric.getValue() );
+      sb.append( ' ' );
+      sb.append( toUnixEpoch( metrics.getCollectedAt() ) );
+      sb.append( '\n' );
     }
-    final MetricName name = metric.getName();
-    sb.append( name.getNamespace().toString().replace( '.','_' ).replace( ',','.' ) + '.' + name.getKey() );
-    sb.append( ' ' );
-    sb.append( metric.getValue() );
-    sb.append( ' ' );
-    sb.append( toUnixEpoch( metric.getCollectedAt() ) );
-    sb.append( '\n' );
+
     acquireConnection().write( sb.toString().getBytes( "US-ASCII" ) );
   }
 

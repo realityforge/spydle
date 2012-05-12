@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.runtime.MetricValue;
+import org.realityforge.spydle.runtime.MetricValueSet;
 
 /**
  * A simple handler used during debugging that writes to a PrintStream.
@@ -23,9 +24,12 @@ public class PrintStreamMetricHandler
     _writer = writer;
   }
 
-  public void metric( final MetricValue metric )
+  public void metrics( final MetricValueSet metrics )
     throws IOException
   {
-    _writer.println( metric.getName() + " = " + metric.getValue() );
+    for( final MetricValue metric : metrics.getMetrics() )
+    {
+      _writer.println( metric.getName() + " = " + metric.getValue() );
+    }
   }
 }

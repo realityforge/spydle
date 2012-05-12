@@ -3,6 +3,7 @@ package org.realityforge.spydle;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.runtime.MetricValue;
+import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 
 /**
@@ -18,9 +19,9 @@ public final class GraphiteMetricHandler
     _graphiteService = graphiteService;
   }
 
-  public void metric( final MetricValue metric )
+  public void metrics( final MetricValueSet metrics )
     throws IOException
   {
-    _graphiteService.writeMetric( metric );
+    _graphiteService.writeMetric( metrics );
   }
 }

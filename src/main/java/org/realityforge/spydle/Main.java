@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -32,6 +33,7 @@ import org.realityforge.spydle.descriptors.jmx.JmxServiceDescriptor;
 import org.realityforge.spydle.descriptors.jmx.JmxTaskDescriptor;
 import org.realityforge.spydle.runtime.MetricName;
 import org.realityforge.spydle.runtime.MetricValue;
+import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.Namespace;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.jdbc.JdbcService;
@@ -149,8 +151,8 @@ public class Main
         final String columnName = entry.getKey();
         final Object value = resultSet.getObject( columnName );
         final MetricValue metricValue =
-          new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value, System.currentTimeMillis() );
-        handler.metric( metricValue );
+          new MetricValue( query.generateKey( key, entry.getKey() ), (Number) value );
+        handler.metrics( new MetricValueSet( Arrays.asList( metricValue ), System.currentTimeMillis() ) );
       }
     }
     resultSet.close();
@@ -260,9 +262,8 @@ public class Main
         if( value instanceof Number )
         {
           final MetricName name = query.generateKey( objectName, attributeName );
-          final MetricValue metricValue =
-            new MetricValue( name, (Number) value, System.currentTimeMillis() );
-          handler.metric( metricValue );
+          final MetricValue metricValue = new MetricValue( name, (Number) value );
+          handler.metrics( new MetricValueSet( Arrays.asList( metricValue ), System.currentTimeMillis() ) );
         }
       }
     }
