@@ -68,6 +68,15 @@ public class JmxQuery
     return _nameComponents;
   }
 
+  @Override
+  public String toString()
+  {
+    return "JmxQuery[objectName=" + _objectName +
+           ",attributeNames=" + _attributeNames +
+           ",namespace=" + _namespace +
+           ",_nameComponents=" + _nameComponents + "]";
+  }
+
   @Nonnull
   public MetricName generateKey( @Nonnull final ObjectName objectName,
                                  @Nonnull final String attribute )
