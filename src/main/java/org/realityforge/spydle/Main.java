@@ -22,9 +22,7 @@ import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.jdbc.JdbcKit;
-import org.realityforge.spydle.runtime.jdbc.JdbcService;
 import org.realityforge.spydle.runtime.jmx.JmxKit;
-import org.realityforge.spydle.runtime.jmx.JmxService;
 import org.realityforge.spydle.runtime.util.ConfigUtil;
 import org.realityforge.spydle.store.MonitorDataStore;
 
@@ -184,10 +182,10 @@ public class Main
         switch( type )
         {
           case "jmx":
-            c_dataStore.registerSource( file.toString(), new JmxService( JmxKit.parse( config ) ) );
+            c_dataStore.registerSource( file.toString(), JmxKit.build( config ) );
             break;
           case "jdbc":
-            c_dataStore.registerSource( file.toString(), new JdbcService( JdbcKit.parse( config ) ) );
+            c_dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
             break;
           default:
             throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );

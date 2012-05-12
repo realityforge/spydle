@@ -17,7 +17,13 @@ public final class JdbcKit
   {
   }
 
-  public static JdbcTaskDescriptor parse( final JSONObject config )
+  public static JdbcService build( final JSONObject config )
+    throws Exception
+  {
+    return new JdbcService( parse( config ) );
+  }
+
+  private static JdbcTaskDescriptor parse( final JSONObject config )
     throws Exception
   {
     final String driver = ConfigUtil.getValue( config, "driver", String.class );

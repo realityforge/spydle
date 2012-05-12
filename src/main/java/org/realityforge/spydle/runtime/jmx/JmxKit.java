@@ -19,7 +19,13 @@ public final class JmxKit
   {
   }
 
-  public static JmxTaskDescriptor parse( final JSONObject config )
+  public static JmxService build( final JSONObject config )
+    throws Exception
+  {
+    return new JmxService( parse( config ) );
+  }
+
+  private static JmxTaskDescriptor parse( final JSONObject config )
     throws Exception
   {
     final String host = ConfigUtil.getValue( config, "host", String.class );
