@@ -9,6 +9,7 @@ define('spydle') do
   compile.options.lint = 'all'
 
   compile.with :javax_annotation,
+               :spice_cli,
                :hsqldb
 
   package(:jar)

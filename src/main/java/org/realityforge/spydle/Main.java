@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.management.MBeanAttributeInfo;
@@ -19,6 +20,10 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import org.realityforge.cli.CLArgsParser;
+import org.realityforge.cli.CLOption;
+import org.realityforge.cli.CLOptionDescriptor;
+import org.realityforge.cli.CLUtil;
 import org.realityforge.spydle.descriptors.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.descriptors.jdbc.JdbcQuery;
 import org.realityforge.spydle.descriptors.jdbc.JdbcServiceDescriptor;
@@ -35,14 +40,49 @@ import org.realityforge.spydle.runtime.jmx.JmxService;
 
 public class Main
 {
+  private static final int HELP_OPT = 1;
+  private static final int HOST_CONFIG_OPT = 'h';
+  private static final int PORT_CONFIG_OPT = 'p';
+  private static final int VERBOSE_OPT = 'v';
 
-  public static final InetSocketAddress GRAPHITE_ADDRESS = new InetSocketAddress( "192.168.0.16", 2003 );
+  private static final CLOptionDescriptor[] OPTIONS = new CLOptionDescriptor[]{
+    new CLOptionDescriptor( "help",
+                            CLOptionDescriptor.ARGUMENT_DISALLOWED,
+                            HELP_OPT,
+                            "print this message and exit" ),
+    new CLOptionDescriptor( "host",
+                            CLOptionDescriptor.ARGUMENT_REQUIRED,
+                            HOST_CONFIG_OPT,
+                            "the host of the graphite server. Defaults to the local host." ),
+    new CLOptionDescriptor( "port",
+                            CLOptionDescriptor.ARGUMENT_REQUIRED,
+                            PORT_CONFIG_OPT,
+                            "the port of the graphite server. Defaults to " + GraphiteServiceDescriptor.DEFAULT_PORT ),
+    new CLOptionDescriptor( "verbose",
+                            CLOptionDescriptor.ARGUMENT_DISALLOWED,
+                            VERBOSE_OPT,
+                            "print verbose message while sending the message." ),
+  };
+
+  private static final int SUCCESS_EXIT_CODE = 0;
+  private static final int ERROR_PARSING_ARGS_EXIT_CODE = 1;
+
+  private static boolean c_verbose;
+  private static String c_graphiteHost = "127.0.0.1";
+  private static int c_graphitePort = 2003;
+
 
   public static void main( final String[] args )
     throws Exception
   {
+    if( !processOptions( args ) )
+    {
+      System.exit( ERROR_PARSING_ARGS_EXIT_CODE );
+      return;
+    }
+
     final GraphiteService graphiteService =
-      new GraphiteService( new GraphiteServiceDescriptor( GRAPHITE_ADDRESS, "PD42.SS" ) );
+      new GraphiteService( new GraphiteServiceDescriptor( c_graphiteHost, c_graphitePort, "PD42.SS" ) );
     final JmxTaskDescriptor task = defineJobDescriptor();
     final JmxService jmxService = new JmxService( task.getService() );
 
@@ -67,6 +107,8 @@ public class Main
     graphiteService.close();
     jmxService.close();
     jdbcService.close();
+
+    System.exit( SUCCESS_EXIT_CODE );
   }
 
   private static void collectJdbcQueryResults( final Connection connection, final MetricHandler handler, final JdbcQuery query )
@@ -225,5 +267,98 @@ public class Main
         }
       }
     }
+  }
+
+  private static boolean processOptions( final String[] args )
+  {
+    // Parse the arguments
+    final CLArgsParser parser = new CLArgsParser( args, OPTIONS );
+
+    //Make sure that there was no errors parsing arguments
+    if( null != parser.getErrorString() )
+    {
+      error( parser.getErrorString() );
+      return false;
+    }
+
+    // Get a list of parsed options
+    @SuppressWarnings( "unchecked" ) final List<CLOption> options = parser.getArguments();
+    for( final CLOption option : options )
+    {
+      switch( option.getId() )
+      {
+        case CLOption.TEXT_ARGUMENT:
+        {
+          error( "Unknown argument specified: " + option.getArgument() );
+          return false;
+        }
+        case HOST_CONFIG_OPT:
+          c_graphiteHost = option.getArgument();
+          break;
+        case PORT_CONFIG_OPT:
+        {
+          final String port = option.getArgument();
+          try
+          {
+            c_graphitePort = Integer.parseInt( port );
+          }
+          catch( final NumberFormatException nfe )
+          {
+            error( "parsing port: " + port );
+            return false;
+          }
+          break;
+        }
+        case VERBOSE_OPT:
+        {
+          c_verbose = true;
+          break;
+        }
+        case HELP_OPT:
+        {
+          printUsage();
+          return false;
+        }
+
+      }
+    }
+    if( c_verbose )
+    {
+      info( "Server Host: " + c_graphiteHost );
+      info( "Server Port: " + c_graphitePort );
+    }
+
+    return true;
+  }
+
+  /**
+   * Print out a usage statement
+   */
+  private static void printUsage()
+  {
+    final String lineSeparator = System.getProperty( "line.separator" );
+
+    final StringBuilder msg = new StringBuilder();
+
+    msg.append( "java " );
+    msg.append( Main.class.getName() );
+    msg.append( " [options] message" );
+    msg.append( lineSeparator );
+    msg.append( "Options: " );
+    msg.append( lineSeparator );
+
+    msg.append( CLUtil.describeOptions( OPTIONS ).toString() );
+
+    info( msg.toString() );
+  }
+
+  private static void info( final String message )
+  {
+    System.out.println( message );
+  }
+
+  private static void error( final String message )
+  {
+    System.out.println( "Error: " + message );
   }
 }
