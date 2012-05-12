@@ -61,6 +61,20 @@ public final class JmxKit
     {
       attributeNames = null;
     }
+    final Namespace namespace = parseNamespace( config );
+    final ArrayList<String> nameComponents = new ArrayList<>();
+    return new JmxQuery( new ObjectName( objectName ), attributeNames, namespace, nameComponents );
+  }
+
+  /**
+   * Parse the "namespace" field from the specified configuration.
+   * If no namespace defined, return an empty namespace.
+   *
+   * @param config the configuration.
+   * @return the namespace.
+   */
+  private static Namespace parseNamespace( final JSONObject config )
+  {
     final LinkedHashMap<String, String> map = new LinkedHashMap<>();
     final JSONObject namespace = getValue( config, "namespace", JSONObject.class, false );
     if( null != namespace )
@@ -70,8 +84,7 @@ public final class JmxKit
         map.put( key.toString(), String.valueOf( namespace.get( key ) ) );
       }
     }
-    final ArrayList<String> nameComponents = new ArrayList<>();
-    return new JmxQuery( new ObjectName( objectName ), attributeNames, new Namespace( map ), nameComponents );
+    return new Namespace( map );
   }
 
 
