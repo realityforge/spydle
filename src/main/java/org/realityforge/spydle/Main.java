@@ -268,7 +268,7 @@ public class Main
 
   private static Namespace newNamespace( final String serviceName )
   {
-    final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+    final LinkedHashMap<String, String> map = new LinkedHashMap<>();
     map.put( "Service", serviceName );
     return new Namespace( map );
   }
