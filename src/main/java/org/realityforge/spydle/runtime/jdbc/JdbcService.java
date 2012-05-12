@@ -1,6 +1,7 @@
 package org.realityforge.spydle.runtime.jdbc;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -26,6 +27,7 @@ public final class JdbcService
 
   private final JdbcTaskDescriptor _descriptor;
   private Connection _connection;
+  private boolean _closed;
 
   public JdbcService( @Nonnull final JdbcTaskDescriptor descriptor )
   {
@@ -33,8 +35,12 @@ public final class JdbcService
   }
 
   private Connection acquireConnection()
-    throws SQLException
+    throws IOException, SQLException
   {
+    if( _closed )
+    {
+      throw new EOFException();
+    }
     if( null != _connection && _connection.isClosed() )
     {
       _connection = null;
@@ -58,6 +64,12 @@ public final class JdbcService
   }
 
   public void close()
+  {
+    _closed = true;
+    doClose();
+  }
+
+  private void doClose()
   {
     if( null != _connection )
     {
@@ -86,7 +98,7 @@ public final class JdbcService
       catch( final Exception e )
       {
         LOG.log( Level.FINE, "Error querying MBeanServer: " + _descriptor.getService() + " Query: " + query, e );
-        close();
+        doClose();
         return null;
       }
     }

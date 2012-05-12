@@ -1,6 +1,7 @@
 package org.realityforge.spydle.runtime.jmx;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Set;
@@ -27,6 +28,7 @@ public final class JmxService
 
   private final JmxTaskDescriptor _descriptor;
   private JMXConnector _connector;
+  private boolean _closed;
 
   public JmxService( @Nonnull final JmxTaskDescriptor descriptor )
   {
@@ -36,6 +38,10 @@ public final class JmxService
   private MBeanServerConnection acquireConnection()
     throws IOException
   {
+    if( _closed )
+    {
+      throw new EOFException();
+    }
     if( null != _connector )
     {
       try
@@ -57,6 +63,12 @@ public final class JmxService
   }
 
   public void close()
+  {
+    _closed = true;
+    doClose();
+  }
+
+  private void doClose()
   {
     if( null != _connector )
     {
@@ -86,7 +98,7 @@ public final class JmxService
       catch( final Exception e )
       {
         LOG.log( Level.FINE, "Error querying MBeanServer: " + _descriptor.getService() + " Query: " + query, e );
-        close();
+        doClose();
         return null;
       }
     }
