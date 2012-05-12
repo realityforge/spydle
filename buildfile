@@ -20,9 +20,7 @@ define('spydle') do
 
   emma.include 'org.realityforge.*'
 
-  ipr.extra_modules << '../jcollectd/jcollectd.iml'
-  ipr.extra_modules << '../membrane/membrane.iml'
-  ipr.extra_modules << '../jrds/jrds.iml'
   ipr.extra_modules << '../gdash/gdash.iml'
-  ipr.extra_modules << '../graphite-relay/graphite-relay.iml'
+  ipr.extra_modules << '../ruby-statsd/ruby-statsd.iml'
+  ipr.extra_modules << '../statsd.scala/statsd.scala.iml'
 end
