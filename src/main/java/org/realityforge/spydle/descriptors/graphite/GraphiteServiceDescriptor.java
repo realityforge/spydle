@@ -24,7 +24,7 @@ public final class GraphiteServiceDescriptor
   {
     _host = host;
     _port = port;
-    _socketAddress = new InetSocketAddress( getHost(), getPort() );
+    _socketAddress = new InetSocketAddress( host, port );
     _prefix = prefix;
   }
 
@@ -49,5 +49,11 @@ public final class GraphiteServiceDescriptor
   public String getPrefix()
   {
     return _prefix;
+  }
+
+  @Override
+  public String toString()
+  {
+    return "Graphite[host=" + getHost() + ",port=" + getPort() + ",prefix=" + getPrefix() + "]";
   }
 }
