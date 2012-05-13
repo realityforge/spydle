@@ -1,7 +1,10 @@
-package org.realityforge.spydle.runtime;
+package org.realityforge.spydle.runtime.print;
 
 import java.io.PrintStream;
 import javax.annotation.Nonnull;
+import org.realityforge.spydle.runtime.MetricSink;
+import org.realityforge.spydle.runtime.MetricValue;
+import org.realityforge.spydle.runtime.MetricValueSet;
 
 /**
  * A simple handler used during debugging that writes to a PrintStream.

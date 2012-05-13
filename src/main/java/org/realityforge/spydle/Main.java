@@ -22,6 +22,7 @@ import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.graphite.GraphiteKit;
 import org.realityforge.spydle.runtime.jdbc.JdbcKit;
 import org.realityforge.spydle.runtime.jmx.JmxKit;
+import org.realityforge.spydle.runtime.print.PrintKit;
 import org.realityforge.spydle.runtime.util.ConfigUtil;
 import org.realityforge.spydle.store.MonitorDataStore;
 
@@ -115,7 +116,6 @@ public class Main
         }
         key.reset();
       }
-      //TODO: c_dataStore.registerSink( "out", new PrintStreamMetricSink( System.out ) );
 
       for( final MetricSource source : c_dataStore.sources() )
       {
@@ -172,6 +172,9 @@ public class Main
             break;
           case "out:graphite":
             c_dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );
+            break;
+          case "out:print":
+            c_dataStore.registerSink( file.toString(), PrintKit.build( config ) );
             break;
           default:
             throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
