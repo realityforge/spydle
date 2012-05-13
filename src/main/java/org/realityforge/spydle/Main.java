@@ -20,8 +20,6 @@ import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValueSet;
 import org.realityforge.spydle.runtime.graphite.GraphiteKit;
-import org.realityforge.spydle.runtime.graphite.GraphiteService;
-import org.realityforge.spydle.runtime.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.jdbc.JdbcKit;
 import org.realityforge.spydle.runtime.jmx.JmxKit;
 import org.realityforge.spydle.runtime.util.ConfigUtil;
@@ -32,8 +30,6 @@ public class Main
   private static final String DEFAULT_CONFIG_DIRECTORY = "./conf.d";
 
   private static final int HELP_OPT = 1;
-  private static final int HOST_CONFIG_OPT = 'h';
-  private static final int PORT_CONFIG_OPT = 'p';
   private static final int VERBOSE_OPT = 'v';
   private static final int CONFIG_DIRECTORY_CONFIG_OPT = 'd';
 
@@ -42,14 +38,6 @@ public class Main
                             CLOptionDescriptor.ARGUMENT_DISALLOWED,
                             HELP_OPT,
                             "print this message and exit" ),
-    new CLOptionDescriptor( "host",
-                            CLOptionDescriptor.ARGUMENT_REQUIRED,
-                            HOST_CONFIG_OPT,
-                            "the host of the graphite server. Defaults to the local host." ),
-    new CLOptionDescriptor( "port",
-                            CLOptionDescriptor.ARGUMENT_REQUIRED,
-                            PORT_CONFIG_OPT,
-                            "the port of the graphite server. Defaults to " + GraphiteServiceDescriptor.DEFAULT_PORT ),
     new CLOptionDescriptor( "verbose",
                             CLOptionDescriptor.ARGUMENT_DISALLOWED,
                             VERBOSE_OPT,
@@ -64,8 +52,6 @@ public class Main
   private static final int ERROR_PARSING_ARGS_EXIT_CODE = 1;
 
   private static boolean c_verbose;
-  private static String c_graphiteHost = "127.0.0.1";
-  private static int c_graphitePort = GraphiteServiceDescriptor.DEFAULT_PORT;
   private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY ).getAbsoluteFile();
   private static MonitorDataStore c_dataStore = new MonitorDataStore();
 
@@ -95,9 +81,6 @@ public class Main
         loadConfiguration( file );
       }
     }
-
-    final GraphiteService graphiteService =
-      new GraphiteService( new GraphiteServiceDescriptor( c_graphiteHost, c_graphitePort, "PD42.SS" ) );
 
     for( int i = 0; i < 10000000; i++ )
     {
@@ -132,8 +115,7 @@ public class Main
         }
         key.reset();
       }
-      c_dataStore.registerSink( "graphiteService", graphiteService );
-      //c_dataStore.registerSink( "out", new PrintStreamMetricSink( System.out ) );
+      //TODO: c_dataStore.registerSink( "out", new PrintStreamMetricSink( System.out ) );
 
       for( final MetricSource source : c_dataStore.sources() )
       {
@@ -225,25 +207,6 @@ public class Main
           error( "Unknown argument specified: " + option.getArgument() );
           return false;
         }
-        case HOST_CONFIG_OPT:
-        {
-          c_graphiteHost = option.getArgument();
-          break;
-        }
-        case PORT_CONFIG_OPT:
-        {
-          final String port = option.getArgument();
-          try
-          {
-            c_graphitePort = Integer.parseInt( port );
-          }
-          catch( final NumberFormatException nfe )
-          {
-            error( "parsing port: " + port );
-            return false;
-          }
-          break;
-        }
         case CONFIG_DIRECTORY_CONFIG_OPT:
         {
           c_configDirectory = new File( option.getArgument() ).getAbsoluteFile();
@@ -276,8 +239,7 @@ public class Main
 
     if( c_verbose )
     {
-      info( "Server Host: " + c_graphiteHost );
-      info( "Server Port: " + c_graphitePort );
+      info( "Config Directory: " + c_configDirectory );
     }
 
     return true;
