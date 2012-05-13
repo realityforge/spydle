@@ -2,16 +2,7 @@ package org.realityforge.spydle;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileReader;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
 import java.util.List;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
@@ -19,12 +10,8 @@ import org.realityforge.cli.CLUtil;
 import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValueSet;
-import org.realityforge.spydle.runtime.graphite.GraphiteKit;
-import org.realityforge.spydle.runtime.jdbc.JdbcKit;
-import org.realityforge.spydle.runtime.jmx.JmxKit;
-import org.realityforge.spydle.runtime.print.PrintKit;
 import org.realityforge.spydle.store.MonitorDataStore;
-import org.realityforge.spydle.util.ConfigUtil;
+import org.realityforge.spydle.util.ConfigScanner;
 
 public class Main
 {
@@ -65,58 +52,12 @@ public class Main
       return;
     }
 
-
-    final WatchService watcher = FileSystems.getDefault().newWatchService();
-    final Path path = c_configDirectory.toPath();
-
-    path.register( watcher,
-                   StandardWatchEventKinds.ENTRY_CREATE,
-                   StandardWatchEventKinds.ENTRY_DELETE,
-                   StandardWatchEventKinds.ENTRY_MODIFY );
-
-    final File[] files = c_configDirectory.listFiles();
-    if( null != files )
-    {
-      for( final File file : files )
-      {
-        loadConfiguration( file );
-      }
-    }
+    final ConfigScanner scanner = new ConfigScanner( c_dataStore, c_configDirectory );
+    scanner.start();
 
     for( int i = 0; i < 10000000; i++ )
     {
-      final WatchKey key = watcher.poll();
-      if( null != key )
-      {
-        for( final WatchEvent<?> event : key.pollEvents() )
-        {
-          final WatchEvent.Kind<?> kind = event.kind();
-          if( StandardWatchEventKinds.OVERFLOW != kind )
-          {
-            @SuppressWarnings( "unchecked" )
-            final WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
-            final Path context = pathEvent.context();
-            final Path file = path.resolve( context ).toFile().getCanonicalFile().toPath();
-            if( StandardWatchEventKinds.ENTRY_CREATE == kind )
-            {
-              System.out.println( "File added: " + file );
-              loadConfiguration( file.toFile() );
-            }
-            else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
-            {
-              System.out.println( "File removed: " + file );
-              c_dataStore.deregisterSource( file.toString() );
-            }
-            else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
-            {
-              System.out.println( "File modified: " + file );
-              loadConfiguration( file.toFile() );
-            }
-          }
-        }
-        key.reset();
-      }
-
+      scanner.scan();
       for( final MetricSource source : c_dataStore.sources() )
       {
         handleMetrics( source.poll() );
@@ -138,7 +79,7 @@ public class Main
         ( (Closeable) source ).close();
       }
     }
-    watcher.close();
+    scanner.close();
 
     System.exit( SUCCESS_EXIT_CODE );
   }
@@ -150,39 +91,6 @@ public class Main
       for( final MetricSink sink : c_dataStore.sinks() )
       {
         sink.handleMetrics( metrics );
-      }
-    }
-  }
-
-  private static void loadConfiguration( final File file )
-  {
-    if( file.getName().endsWith( ".json" ) )
-    {
-      try
-      {
-        final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
-        final String type = ConfigUtil.getValue( config, "type", String.class );
-        switch( type )
-        {
-          case "in:jmx":
-            c_dataStore.registerSource( file.toString(), JmxKit.build( config ) );
-            break;
-          case "in:jdbc":
-            c_dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
-            break;
-          case "out:graphite":
-            c_dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );
-            break;
-          case "out:print":
-            c_dataStore.registerSink( file.toString(), PrintKit.build( config ) );
-            break;
-          default:
-            throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
-        }
-      }
-      catch( Exception e )
-      {
-        e.printStackTrace();
       }
     }
   }
