@@ -66,7 +66,20 @@ public final class JmxKit
       attributeNames = null;
     }
     final Namespace namespace = ConfigUtil.parseNamespace( config );
-    final ArrayList<String> nameComponents = new ArrayList<>();
+    final JSONArray nameComponentsArray = ConfigUtil.getValue( config, "name_components", JSONArray.class, false );
+    final ArrayList<String> nameComponents;
+    if( null != nameComponentsArray )
+    {
+      nameComponents = new ArrayList<>();
+      for( final Object nameComponent : nameComponentsArray )
+      {
+        nameComponents.add( nameComponent.toString() );
+      }
+    }
+    else
+    {
+      nameComponents = null;
+    }
     return new JmxProbeDescriptor( new ObjectName( objectName ), attributeNames, namespace, nameComponents );
   }
 }
