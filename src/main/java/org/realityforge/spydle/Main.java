@@ -19,6 +19,7 @@ import org.realityforge.cli.CLUtil;
 import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValueSet;
+import org.realityforge.spydle.runtime.graphite.GraphiteKit;
 import org.realityforge.spydle.runtime.graphite.GraphiteService;
 import org.realityforge.spydle.runtime.graphite.GraphiteServiceDescriptor;
 import org.realityforge.spydle.runtime.jdbc.JdbcKit;
@@ -186,6 +187,9 @@ public class Main
             break;
           case "in:jdbc":
             c_dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
+            break;
+          case "out:graphite":
+            c_dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );
             break;
           default:
             throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
