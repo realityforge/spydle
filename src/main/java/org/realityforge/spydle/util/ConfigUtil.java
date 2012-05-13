@@ -1,4 +1,4 @@
-package org.realityforge.spydle.runtime.util;
+package org.realityforge.spydle.util;
 
 import java.util.LinkedHashMap;
 import javax.annotation.Nonnull;

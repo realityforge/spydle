@@ -8,7 +8,7 @@ import javax.management.ObjectName;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.realityforge.spydle.runtime.Namespace;
-import org.realityforge.spydle.runtime.util.ConfigUtil;
+import org.realityforge.spydle.util.ConfigUtil;
 
 /**
  * Utility class to interact with the JmxSource.

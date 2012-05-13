@@ -23,8 +23,8 @@ import org.realityforge.spydle.runtime.graphite.GraphiteKit;
 import org.realityforge.spydle.runtime.jdbc.JdbcKit;
 import org.realityforge.spydle.runtime.jmx.JmxKit;
 import org.realityforge.spydle.runtime.print.PrintKit;
-import org.realityforge.spydle.runtime.util.ConfigUtil;
 import org.realityforge.spydle.store.MonitorDataStore;
+import org.realityforge.spydle.util.ConfigUtil;
 
 public class Main
 {

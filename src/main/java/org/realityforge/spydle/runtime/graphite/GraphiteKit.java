@@ -1,7 +1,7 @@
 package org.realityforge.spydle.runtime.graphite;
 
 import org.json.simple.JSONObject;
-import org.realityforge.spydle.runtime.util.ConfigUtil;
+import org.realityforge.spydle.util.ConfigUtil;
 
 /**
  * Utility class to interact with the GraphiteSink.
