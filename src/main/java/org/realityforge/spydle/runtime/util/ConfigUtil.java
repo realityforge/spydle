@@ -22,18 +22,23 @@ public final class ConfigUtil
    * @param config the configuration.
    * @return the namespace.
    */
+  @Nullable
   public static Namespace parseNamespace( final JSONObject config )
   {
-    final LinkedHashMap<String, String> map = new LinkedHashMap<>();
     final JSONObject namespace = getValue( config, "namespace", JSONObject.class, false );
     if( null != namespace )
     {
+      final LinkedHashMap<String, String> map = new LinkedHashMap<>();
       for( final Object key : namespace.keySet() )
       {
         map.put( key.toString(), String.valueOf( namespace.get( key ) ) );
       }
+      return new Namespace( map );
     }
-    return new Namespace( map );
+    else
+    {
+      return null;
+    }
   }
 
   /**
