@@ -181,10 +181,10 @@ public class Main
         final String type = ConfigUtil.getValue( config, "type", String.class );
         switch( type )
         {
-          case "jmx":
+          case "in:jmx":
             c_dataStore.registerSource( file.toString(), JmxKit.build( config ) );
             break;
-          case "jdbc":
+          case "in:jdbc":
             c_dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
             break;
           default:
