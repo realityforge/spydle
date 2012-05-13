@@ -20,8 +20,4 @@ define('spydle') do
   test.compile.with :mockito
 
   emma.include 'org.realityforge.*'
-
-  ipr.extra_modules << '../gdash/gdash.iml'
-  ipr.extra_modules << '../ruby-statsd/ruby-statsd.iml'
-  ipr.extra_modules << '../statsd.scala/statsd.scala.iml'
 end
