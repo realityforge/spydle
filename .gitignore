@@ -3,5 +3,6 @@
 /*.iws
 /target
 /reports
+/conf.d
 /docs
 _buildr.rb
