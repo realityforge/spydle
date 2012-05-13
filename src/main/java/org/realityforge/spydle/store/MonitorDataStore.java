@@ -15,11 +15,20 @@ import org.realityforge.spydle.runtime.MetricSource;
  * Simple store for sources and sinks of monitoring data.
  */
 public final class MonitorDataStore
+  implements Closeable
 {
   private static final Logger LOG = Logger.getLogger( MonitorDataStore.class.getName() );
 
   private final Map<String, MetricSource> _sources = new HashMap<>();
   private final Map<String, MetricSink> _sinks = new HashMap<>();
+
+  @Override
+  public void close()
+    throws IOException
+  {
+    _sources.clear();
+    _sinks.clear();
+  }
 
   public void registerSource( @Nonnull final String key, @Nonnull final MetricSource sink )
   {
