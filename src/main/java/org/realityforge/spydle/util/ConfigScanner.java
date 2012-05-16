@@ -10,6 +10,8 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -22,9 +24,11 @@ import org.realityforge.spydle.store.MonitorDataStore;
 /**
  * Utility class that monitors a configuration directory and updates data store when configuration changes.
  */
-public class ConfigScanner
+public final class ConfigScanner
   implements Closeable
 {
+  private static final Logger LOG = Logger.getLogger( ConfigScanner.class.getName() );
+
   @Nonnull
   private final MonitorDataStore _dataStore;
   @Nonnull
@@ -69,7 +73,6 @@ public class ConfigScanner
   }
 
   public void scan()
-    throws IOException
   {
     final WatchKey key = _watcher.poll();
     if( null != key )
@@ -82,21 +85,25 @@ public class ConfigScanner
           @SuppressWarnings( "unchecked" )
           final WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
           final Path context = pathEvent.context();
-          final Path file = _configDirectory.toPath().resolve( context ).toFile().getCanonicalFile().toPath();
-          if( StandardWatchEventKinds.ENTRY_CREATE == kind )
+          final File file =
+            _configDirectory.toPath().resolve( context ).toFile().toPath().toFile();
+          if( file.getName().endsWith( ".json" ) )
           {
-            System.out.println( "File added: " + file );
-            loadConfiguration( file.toFile() );
-          }
-          else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
-          {
-            System.out.println( "File removed: " + file );
-            _dataStore.deregisterSource( file.toString() );
-          }
-          else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
-          {
-            System.out.println( "File modified: " + file );
-            loadConfiguration( file.toFile() );
+            if( StandardWatchEventKinds.ENTRY_CREATE == kind )
+            {
+              LOG.info( "Configuration file added: " + file );
+              loadConfiguration( file );
+            }
+            else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
+            {
+              LOG.info( "Configuration file removed: " + file );
+              _dataStore.deregisterSource( file.toString() );
+            }
+            else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
+            {
+              LOG.info( "Configuration file modified: " + file );
+              loadConfiguration( file );
+            }
           }
         }
       }
@@ -106,34 +113,32 @@ public class ConfigScanner
 
   private void loadConfiguration( final File file )
   {
-    if( file.getName().endsWith( ".json" ) )
+    try
     {
-      try
+      final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
+      final String type = ConfigUtil.getValue( config, "type", String.class );
+      switch( type )
       {
-        final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
-        final String type = ConfigUtil.getValue( config, "type", String.class );
-        switch( type )
-        {
-          case "in:jmx":
-            _dataStore.registerSource( file.toString(), JmxKit.build( config ) );
-            break;
-          case "in:jdbc":
-            _dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
-            break;
-          case "out:graphite":
-            _dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );
-            break;
-          case "out:print":
-            _dataStore.registerSink( file.toString(), PrintKit.build( config ) );
-            break;
-          default:
-            throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
-        }
+        case "in:jmx":
+          _dataStore.registerSource( file.toString(), JmxKit.build( config ) );
+          break;
+        case "in:jdbc":
+          _dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
+          break;
+        case "out:graphite":
+          _dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );
+          break;
+        case "out:print":
+          _dataStore.registerSink( file.toString(), PrintKit.build( config ) );
+          break;
+        default:
+          throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
       }
-      catch( Exception e )
-      {
-        e.printStackTrace();
-      }
+    }
+    catch( final Throwable t )
+    {
+      LOG.log( Level.WARNING, "Error parsing configuration file: " + file, t );
     }
   }
 }
+
