@@ -20,11 +20,7 @@ import org.realityforge.spydle.runtime.print.PrintKit;
 import org.realityforge.spydle.store.MonitorDataStore;
 
 /**
- * Created by IntelliJ IDEA.
- * User: peter
- * Date: 13/05/12
- * Time: 10:36 AM
- * To change this template use File | Settings | File Templates.
+ * Utility class that monitors a configuration directory and updates data store when configuration changes.
  */
 public class ConfigScanner
   implements Closeable
