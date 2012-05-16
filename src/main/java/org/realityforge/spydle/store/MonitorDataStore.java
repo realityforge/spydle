@@ -30,10 +30,14 @@ public final class MonitorDataStore
     _sinks.clear();
   }
 
-  public void registerSource( @Nonnull final String key, @Nonnull final MetricSource sink )
+  public void registerSource( @Nonnull final String key, @Nonnull final MetricSource source )
   {
+    if( LOG.isLoggable( Level.FINE ) )
+    {
+      LOG.fine( "MonitorDataStore.registerSource(" + key + "," + source + ")" );
+    }
     deregisterSource( key );
-    _sources.put( key, sink );
+    _sources.put( key, source );
   }
 
   public Collection<MetricSource> sources()
@@ -44,6 +48,10 @@ public final class MonitorDataStore
   public void deregisterSource( @Nonnull final String key )
   {
     final MetricSource existing = _sources.remove( key );
+    if( LOG.isLoggable( Level.FINE ) )
+    {
+      LOG.fine( "MonitorDataStore.deregisterSource(" + key + ") => " + existing );
+    }
     if( existing instanceof Closeable )
     {
       try
@@ -59,6 +67,10 @@ public final class MonitorDataStore
 
   public void registerSink( @Nonnull final String key, @Nonnull final MetricSink sink )
   {
+    if( LOG.isLoggable( Level.FINE ) )
+    {
+      LOG.fine( "MonitorDataStore.registerSink(" + key + "," + sink + ")" );
+    }
     deregisterSink( key );
     _sinks.put( key, sink );
   }
@@ -71,6 +83,10 @@ public final class MonitorDataStore
   public void deregisterSink( @Nonnull final String key )
   {
     final MetricSink existing = _sinks.remove( key );
+    if( LOG.isLoggable( Level.FINE ) )
+    {
+      LOG.fine( "MonitorDataStore.deregisterSink(" + key + ") => " + existing );
+    }
     if( existing instanceof Closeable )
     {
       try
