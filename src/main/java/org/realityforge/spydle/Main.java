@@ -1,21 +1,19 @@
 package org.realityforge.spydle;
 
-import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
-import org.realityforge.spydle.runtime.MetricSink;
-import org.realityforge.spydle.runtime.MetricSource;
-import org.realityforge.spydle.runtime.MetricValueSet;
+import org.realityforge.spydle.store.MetricRouter;
 import org.realityforge.spydle.store.MonitorDataStore;
 import org.realityforge.spydle.util.ConfigScanner;
 
 public class Main
 {
-  private static final String DEFAULT_CONFIG_DIRECTORY = "./conf.d";
+  private static final String DEFAULT_CONFIG_DIRECTORY = "conf.d";
 
   private static final int HELP_OPT = 1;
   private static final int VERBOSE_OPT = 'v';
@@ -55,44 +53,40 @@ public class Main
     final ConfigScanner scanner = new ConfigScanner( c_dataStore, c_configDirectory );
     scanner.start();
 
+    final MetricRouter router = new MetricRouter( c_dataStore );
+
     for( int i = 0; i < 10000000; i++ )
     {
       scanner.scan();
-      for( final MetricSource source : c_dataStore.sources() )
-      {
-        handleMetrics( source.poll() );
-      }
+      router.tick();
       Thread.sleep( 100 );
     }
 
-    for( final MetricSink sink : c_dataStore.sinks() )
+    Runtime.getRuntime().addShutdownHook( new Thread()
     {
-      if( sink instanceof Closeable )
+      @Override
+      public void run()
       {
-        ( (Closeable) sink ).close();
-      }
-    }
-    for( final MetricSource source : c_dataStore.sources() )
-    {
-      if( source instanceof Closeable )
-      {
-        ( (Closeable) source ).close();
-      }
-    }
-    scanner.close();
+        try
+        {
+          router.close();
+        }
+        catch( final IOException ioe )
+        {
+          //Ignored
+        }
+        try
+        {
+          scanner.close();
+        }
+        catch( final IOException ioe )
+        {
+          //Ignored
+        }
 
-    System.exit( SUCCESS_EXIT_CODE );
-  }
-
-  private static void handleMetrics( final MetricValueSet metrics )
-  {
-    if( null != metrics )
-    {
-      for( final MetricSink sink : c_dataStore.sinks() )
-      {
-        sink.handleMetrics( metrics );
+        System.exit( SUCCESS_EXIT_CODE );
       }
-    }
+    } );
   }
 
   private static boolean processOptions( final String[] args )
