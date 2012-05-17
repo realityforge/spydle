@@ -18,6 +18,7 @@ final class SourceEntry
   {
     _source = source;
     _period = period;
+    poll( System.currentTimeMillis() );
   }
 
   void poll( final long time )
