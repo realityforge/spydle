@@ -52,7 +52,7 @@ public class Main
     //noinspection InfiniteLoopStatement
     while( true )
     {
-      final long sleepTime = runtime.getScheduler().tick( System.currentTimeMillis() );
+      final long sleepTime = runtime.tick();
       try
       {
         Thread.sleep( sleepTime );

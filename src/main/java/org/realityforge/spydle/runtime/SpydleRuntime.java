@@ -24,18 +24,18 @@ public class SpydleRuntime
       stop();
     }
     _configDirectory = configDirectory;
-    _scanner = new ConfigScanner( getDataStore(), _configDirectory );
-    getScanner().start();
-    getScheduler().addTrigger( "Scanner", "system", new PeriodicTimeTrigger( 200 ), new Runnable()
+    _scanner = new ConfigScanner( _dataStore, _configDirectory );
+    _scanner.start();
+    _scheduler.addTrigger( "Scanner", "system", new PeriodicTimeTrigger( 200 ), new Runnable()
     {
       @Override
       public void run()
       {
-        getScanner().scan();
+        _scanner.scan();
       }
     } );
 
-    getScheduler().addTrigger( "GC", "system", new PeriodicTimeTrigger( 1000 ), new Runnable()
+    _scheduler.addTrigger( "GC", "system", new PeriodicTimeTrigger( 1000 ), new Runnable()
     {
       @Override
       public void run()
@@ -49,30 +49,15 @@ public class SpydleRuntime
   {
     if( null != _configDirectory )
     {
-      getDataStore().close();
-      getExecutionEngine().close();
-      getScanner().close();
+      _dataStore.close();
+      _executionEngine.close();
+      _scanner.close();
       _configDirectory = null;
     }
   }
 
-  public ConfigScanner getScanner()
+  public long tick()
   {
-    return _scanner;
-  }
-
-  public ExecutionEngine getExecutionEngine()
-  {
-    return _executionEngine;
-  }
-
-  public Scheduler getScheduler()
-  {
-    return _scheduler;
-  }
-
-  public MonitorDataStore getDataStore()
-  {
-    return _dataStore;
+    return _scheduler.tick( System.currentTimeMillis() );
   }
 }
