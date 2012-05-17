@@ -56,6 +56,10 @@ public class Main
       scanner.scan();
       final long sleepTime = c_dataStore.tick( System.currentTimeMillis() );
       System.out.println( "sleepTime = " + sleepTime );
+      if( sleepTime > 200 )
+      {
+        System.gc();
+      }
       Thread.sleep( sleepTime );
     }
 
