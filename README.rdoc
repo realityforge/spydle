@@ -8,9 +8,6 @@ expect this to change over time.
 
 = TODO
 
-Investigate graphiti (https://github.com/realityforge/graphiti) and the pull request that uses local filesystem
-rather than S3. It could replace the built in graphite UI.
-
 Introduce https://github.com/etsy/logster/blob/master/logster as a source of data.
 
 Merge in functionality similar to https://github.com/markchadwick/graphite-relay
