@@ -24,9 +24,48 @@ public final class MonitorDataStore
 
   @Override
   public void close()
+    throws IOException
   {
+    IOException problem = null;
+    LOG.info( "Closing router" );
+    for( final MetricSink sink : _sinks.values() )
+    {
+      if( sink instanceof Closeable )
+      {
+        try
+        {
+          ( (Closeable) sink ).close();
+        }
+        catch( final IOException ioe )
+        {
+          ioe.fillInStackTrace();
+          LOG.log( Level.WARNING, "Problem closing sink " + sink, ioe );
+          problem = ioe;
+        }
+      }
+    }
+    for( final MetricSource source : _sources.values() )
+    {
+      if( source instanceof Closeable )
+      {
+        try
+        {
+          ( (Closeable) source ).close();
+        }
+        catch( final IOException ioe )
+        {
+          ioe.fillInStackTrace();
+          LOG.log( Level.WARNING, "Problem closing source " + source, ioe );
+          problem = ioe;
+        }
+      }
+    }
     _sources.clear();
     _sinks.clear();
+    if( null != problem )
+    {
+      throw problem;
+    }
   }
 
   public void registerSource( @Nonnull final String key, @Nonnull final MetricSource source )

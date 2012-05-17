@@ -69,7 +69,7 @@ public class Main
       {
         try
         {
-          router.close();
+          c_dataStore.close();
         }
         catch( final IOException ioe )
         {
