@@ -109,6 +109,7 @@ public final class ConfigScanner
             else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
             {
               LOG.info( "Configuration file modified: " + file );
+              _dataStore.deregisterSource( file.toString() );
               loadConfiguration( file );
             }
           }
