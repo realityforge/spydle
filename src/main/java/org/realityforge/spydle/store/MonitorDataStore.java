@@ -24,7 +24,7 @@ public final class MonitorDataStore
   private final Map<String, SourceEntry> _sources = new HashMap<>();
   private final PriorityQueue<SourceEntry> _sourceQueue =
     new PriorityQueue<>( 10, SourceEntrySchedulingComparator.COMPARATOR );
-  private final Map<String, MetricSink> _sinks = new HashMap<>();
+  private final Map<String, SinkEntry> _sinks = new HashMap<>();
 
   public long tick( final long now )
   {
@@ -65,11 +65,11 @@ public final class MonitorDataStore
 
   private void queueRoute( final MetricValueSet metrics )
   {
-    for( final MetricSink sink : _sinks.values() )
+    for( final SinkEntry sink : _sinks.values() )
     {
       try
       {
-        sink.handleMetrics( metrics );
+        sink.getSink().handleMetrics( metrics );
       }
       catch( final Throwable t )
       {
@@ -86,9 +86,9 @@ public final class MonitorDataStore
     }
     _sources.clear();
     _sourceQueue.clear();
-    for( final Map.Entry<String, MetricSink> entry : _sinks.entrySet() )
+    for( final Map.Entry<String, SinkEntry> entry : _sinks.entrySet() )
     {
-      doClose( entry.getKey(), entry.getValue() );
+      doClose( entry.getKey(), entry.getValue().getSink() );
     }
     _sinks.clear();
   }
@@ -138,45 +138,43 @@ public final class MonitorDataStore
       LOG.fine( "MonitorDataStore.registerSink(" + key + "," + sink + ")" );
     }
     deregisterSink( key );
-    _sinks.put( key, sink );
+    _sinks.put( key, new SinkEntry( sink, stage ) );
   }
 
   public synchronized void deregisterSink( @Nonnull final String key )
   {
-    final MetricSink existing = _sinks.remove( key );
+    final SinkEntry existing = _sinks.remove( key );
     if( LOG.isLoggable( Level.FINE ) )
     {
       LOG.fine( "MonitorDataStore.deregisterSink(" + key + ") => " + existing );
     }
-    doClose( key, existing );
+    if( null != existing )
+    {
+      doClose( key, existing.getSink() );
+    }
   }
 
   private void doClose( final String key, final MetricSource existing )
   {
-    if( existing instanceof Closeable )
-    {
-      try
-      {
-        ( (Closeable) existing ).close();
-      }
-      catch( final IOException e )
-      {
-        LOG.log( Level.FINE, "Error closing existing source for key " + key, e );
-      }
-    }
+    doClose( "source", key, existing );
   }
 
   private void doClose( final String key, final MetricSink existing )
   {
-    if( existing instanceof Closeable )
+    doClose( "sink", key, existing );
+  }
+
+  private void doClose( final String type, final String key, final Object object )
+  {
+    if( object instanceof Closeable )
     {
       try
       {
-        ( (Closeable) existing ).close();
+        ( (Closeable) object ).close();
       }
       catch( final IOException e )
       {
-        LOG.log( Level.FINE, "Error closing existing sink for key " + key, e );
+        LOG.log( Level.FINE, "Error closing " + type + " for key " + key, e );
       }
     }
   }
