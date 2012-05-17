@@ -6,6 +6,7 @@ import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
+import org.realityforge.spydle.runtime.ExecutionEngine;
 import org.realityforge.spydle.runtime.MonitorDataStore;
 import org.realityforge.spydle.runtime.TimeScheduler;
 import org.realityforge.spydle.util.ConfigScanner;
@@ -38,7 +39,7 @@ public class Main
 
   private static boolean c_verbose;
   private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY ).getAbsoluteFile();
-  public static final TimeScheduler c_scheduler = new TimeScheduler();
+  public static final TimeScheduler c_scheduler = new TimeScheduler(new ExecutionEngine() );
   private static final MonitorDataStore c_dataStore = new MonitorDataStore( c_scheduler );
 
   public static void main( final String[] args )

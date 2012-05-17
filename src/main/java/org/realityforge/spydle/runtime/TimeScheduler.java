@@ -1,10 +1,7 @@
 package org.realityforge.spydle.runtime;
 
 import java.util.HashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.PriorityQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
@@ -15,11 +12,15 @@ public class TimeScheduler
 
   private static final Logger LOG = Logger.getLogger( TimeScheduler.class.getName() );
 
-  private final HashMap<String, ThreadPoolExecutor> _executors = new HashMap<>();
+  @Nonnull
+  private final ExecutionEngine _executionEngine;
   private final HashMap<String, TimeEntry> _entryMap = new HashMap<>();
-  private final PriorityBlockingQueue<TimeEntry> _queue =
-    new PriorityBlockingQueue<>( 10, TimeEntryComparator.COMPARATOR );
-  private boolean _running;
+  private final PriorityQueue<TimeEntry> _queue = new PriorityQueue<>( 10, TimeEntryComparator.COMPARATOR );
+
+  public TimeScheduler( @Nonnull final ExecutionEngine executionEngine )
+  {
+    _executionEngine = executionEngine;
+  }
 
   public synchronized void addTrigger( @Nonnull final String name,
                                        @Nonnull final String stage,
@@ -30,7 +31,6 @@ public class TimeScheduler
     final TimeEntry entry = new TimeEntry( name, stage, trigger, target );
     _entryMap.put( name, entry );
     scheduleEntry( entry );
-    notify();
   }
 
   public synchronized void removeTrigger( @Nonnull final String name )
@@ -65,7 +65,7 @@ public class TimeScheduler
 
   private void run( final TimeEntry entry )
   {
-    getExecutorForStage( entry.getStage() ).execute( new Runnable()
+    _executionEngine.execute( entry.getStage(), new Runnable()
     {
       @Override
       public void run()
@@ -91,46 +91,5 @@ public class TimeScheduler
   private synchronized void scheduleEntry( final TimeEntry entry )
   {
     _queue.add( entry );
-  }
-
-  private ThreadPoolExecutor getExecutorForStage( final String stage )
-  {
-    ThreadPoolExecutor executor = _executors.get( stage );
-    if( null == executor )
-    {
-      executor = newExecutor();
-      _executors.put( stage, executor );
-    }
-    return executor;
-  }
-
-  private ThreadPoolExecutor newExecutor()
-  {
-    return new ThreadPoolExecutor( 1,
-                                   4,
-                                   0L,
-                                   TimeUnit.MILLISECONDS,
-                                   new LinkedBlockingQueue<Runnable>() );
-  }
-
-  public void run()
-  {
-    _running = true;
-    while( _running )
-    {
-      final long sleepTime = tick( System.currentTimeMillis() );
-
-      try
-      {
-        synchronized( this )
-        {
-          wait( sleepTime );
-        }
-      }
-      catch( final InterruptedException ie )
-      {
-        //Ignored
-      }
-    }
   }
 }
