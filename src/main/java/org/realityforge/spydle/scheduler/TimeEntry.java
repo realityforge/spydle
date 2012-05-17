@@ -7,6 +7,8 @@ final class TimeEntry
   @Nonnull
   private final String _name;
   @Nonnull
+  private final String _stage;
+  @Nonnull
   private final TimeTrigger _trigger;
   @Nonnull
   private final Runnable _target;
@@ -15,10 +17,12 @@ final class TimeEntry
   private long _nextTime;
 
   TimeEntry( @Nonnull final String name,
+             @Nonnull final String stage,
              @Nonnull final TimeTrigger trigger,
              @Nonnull final Runnable target )
   {
     _name = name;
+    _stage = stage;
     _trigger = trigger;
     _target = target;
     _nextTime = _trigger.getTimeAfter( System.currentTimeMillis() );
@@ -28,6 +32,12 @@ final class TimeEntry
   String getName()
   {
     return _name;
+  }
+
+  @Nonnull
+  String getStage()
+  {
+    return _stage;
   }
 
   @Nonnull
