@@ -8,7 +8,7 @@ import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
 import org.realityforge.spydle.runtime.SpydleRuntime;
 
-public class Main
+public final class Main
 {
   private static final String DEFAULT_CONFIG_DIRECTORY = "conf.d";
 
