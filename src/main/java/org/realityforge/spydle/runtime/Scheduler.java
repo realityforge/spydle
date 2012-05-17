@@ -6,9 +6,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
-public class Scheduler
+final class Scheduler
 {
-  public static final int MAX_SLEEP_TIME = 1000;
+  static final int MAX_SLEEP_TIME = 1000;
 
   private static final Logger LOG = Logger.getLogger( Scheduler.class.getName() );
 
@@ -17,15 +17,15 @@ public class Scheduler
   private final HashMap<String, TimeEntry> _entryMap = new HashMap<>();
   private final PriorityQueue<TimeEntry> _queue = new PriorityQueue<>( 10, TimeEntryComparator.COMPARATOR );
 
-  public Scheduler( @Nonnull final ExecutionEngine executionEngine )
+  Scheduler( @Nonnull final ExecutionEngine executionEngine )
   {
     _executionEngine = executionEngine;
   }
 
-  public synchronized void addTrigger( @Nonnull final String name,
-                                       @Nonnull final String stage,
-                                       @Nonnull final TimeTrigger trigger,
-                                       @Nonnull final Runnable target )
+  synchronized void addTrigger( @Nonnull final String name,
+                                @Nonnull final String stage,
+                                @Nonnull final TimeTrigger trigger,
+                                @Nonnull final Runnable target )
   {
     removeTrigger( name );
     final TimeEntry entry = new TimeEntry( name, stage, trigger, target );
@@ -33,7 +33,7 @@ public class Scheduler
     scheduleEntry( entry );
   }
 
-  public synchronized void removeTrigger( @Nonnull final String name )
+  synchronized void removeTrigger( @Nonnull final String name )
   {
     final TimeEntry entry = _entryMap.remove( name );
     if( null != entry )
@@ -42,7 +42,7 @@ public class Scheduler
     }
   }
 
-  public synchronized long tick( final long now )
+  synchronized long tick( final long now )
   {
     TimeEntry entry;
     //noinspection LoopStatementThatDoesntLoop

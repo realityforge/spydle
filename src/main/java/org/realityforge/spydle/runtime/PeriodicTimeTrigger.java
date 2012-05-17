@@ -2,13 +2,13 @@ package org.realityforge.spydle.runtime;
 
 import javax.annotation.Nonnegative;
 
-public final class PeriodicTimeTrigger
+final class PeriodicTimeTrigger
   implements TimeTrigger
 {
   private final int _period;
   private long _triggerTime;
 
-  public PeriodicTimeTrigger( @Nonnegative final int period )
+  PeriodicTimeTrigger( @Nonnegative final int period )
   {
     _period = period;
     _triggerTime = System.currentTimeMillis();

@@ -13,12 +13,12 @@ import javax.annotation.Nonnull;
  * This isolates slow running actions from other actions unless they are
  * in the same stage.
  */
-public final class ExecutionEngine
+final class ExecutionEngine
   implements Closeable
 {
   private final HashMap<String, ThreadPoolExecutor> _executors = new HashMap<>();
 
-  public void execute( @Nonnull final String stage, @Nonnull final Runnable runnable )
+  void execute( @Nonnull final String stage, @Nonnull final Runnable runnable )
   {
     getExecutorForStage( stage ).execute( runnable );
   }

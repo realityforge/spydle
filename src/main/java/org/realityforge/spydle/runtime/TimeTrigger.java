@@ -1,6 +1,6 @@
 package org.realityforge.spydle.runtime;
 
-public interface TimeTrigger
+interface TimeTrigger
 {
   long getTimeAfter( long moment );
 }

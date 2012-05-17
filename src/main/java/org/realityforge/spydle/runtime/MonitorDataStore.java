@@ -14,7 +14,7 @@ import org.realityforge.spydle.MetricValueSet;
 /**
  * Simple store for sources and sinks of monitoring data.
  */
-public final class MonitorDataStore
+final class MonitorDataStore
   implements Closeable
 {
   private static final Logger LOG = Logger.getLogger( MonitorDataStore.class.getName() );
@@ -24,7 +24,7 @@ public final class MonitorDataStore
   private final Map<String, SourceEntry> _sources = new HashMap<>();
   private final Map<String, SinkEntry> _sinks = new HashMap<>();
 
-  public MonitorDataStore( @Nonnull final Scheduler scheduler )
+  MonitorDataStore( @Nonnull final Scheduler scheduler )
   {
     _scheduler = scheduler;
   }
@@ -44,7 +44,7 @@ public final class MonitorDataStore
     }
   }
 
-  public synchronized void clear()
+  synchronized void clear()
   {
     for( final Map.Entry<String, SourceEntry> entry : _sources.entrySet() )
     {
@@ -66,10 +66,10 @@ public final class MonitorDataStore
     clear();
   }
 
-  public synchronized void registerSource( @Nonnull final String key,
-                                           @Nonnull final MetricSource source,
-                                           @Nonnull final String stage,
-                                           final int pollPeriod )
+  synchronized void registerSource( @Nonnull final String key,
+                                    @Nonnull final MetricSource source,
+                                    @Nonnull final String stage,
+                                    final int pollPeriod )
   {
     if( LOG.isLoggable( Level.FINE ) )
     {
@@ -81,12 +81,12 @@ public final class MonitorDataStore
     _scheduler.addTrigger( key, stage, entry, entry );
   }
 
-  public synchronized boolean isSourceRegistered( @Nonnull final String key )
+  synchronized boolean isSourceRegistered( @Nonnull final String key )
   {
     return null != _sources.remove( key );
   }
-  
-  public synchronized void deregisterSource( @Nonnull final String key )
+
+  synchronized void deregisterSource( @Nonnull final String key )
   {
     final SourceEntry existing = _sources.remove( key );
     if( LOG.isLoggable( Level.FINE ) )
@@ -105,9 +105,9 @@ public final class MonitorDataStore
     }
   }
 
-  public synchronized void registerSink( @Nonnull final String key,
-                                         @Nonnull final MetricSink sink,
-                                         @Nonnull final String stage )
+  synchronized void registerSink( @Nonnull final String key,
+                                  @Nonnull final MetricSink sink,
+                                  @Nonnull final String stage )
   {
     if( LOG.isLoggable( Level.FINE ) )
     {
@@ -117,12 +117,12 @@ public final class MonitorDataStore
     _sinks.put( key, new SinkEntry( sink, stage ) );
   }
 
-  public synchronized boolean isSinkRegistered( @Nonnull final String key )
+  synchronized boolean isSinkRegistered( @Nonnull final String key )
   {
     return null != _sinks.remove( key );
   }
 
-  public synchronized void deregisterSink( @Nonnull final String key )
+  synchronized void deregisterSink( @Nonnull final String key )
   {
     final SinkEntry existing = _sinks.remove( key );
     if( LOG.isLoggable( Level.FINE ) )

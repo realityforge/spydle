@@ -2,7 +2,6 @@ package org.realityforge.spydle.runtime;
 
 import java.io.File;
 import java.io.IOException;
-import org.realityforge.spydle.util.ConfigScanner;
 
 /**
  * A class responsible for coordinating the components that make up the Spydle service.

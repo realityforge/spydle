@@ -1,4 +1,4 @@
-package org.realityforge.spydle.util;
+package org.realityforge.spydle.runtime;
 
 import java.io.Closeable;
 import java.io.File;
@@ -19,12 +19,12 @@ import org.realityforge.spydle.graphite.GraphiteKit;
 import org.realityforge.spydle.jdbc.JdbcKit;
 import org.realityforge.spydle.jmx.JmxKit;
 import org.realityforge.spydle.print.PrintKit;
-import org.realityforge.spydle.runtime.MonitorDataStore;
+import org.realityforge.spydle.util.ConfigUtil;
 
 /**
  * Utility class that monitors a configuration directory and updates data store when configuration changes.
  */
-public final class ConfigScanner
+final class ConfigScanner
   implements Closeable
 {
   private static final Logger LOG = Logger.getLogger( ConfigScanner.class.getName() );
@@ -57,7 +57,7 @@ public final class ConfigScanner
     }
   }
 
-  public void start()
+  void start()
     throws IOException
   {
     _dataStore.clear();
@@ -79,7 +79,7 @@ public final class ConfigScanner
     }
   }
 
-  public void scan()
+  void scan()
   {
     final WatchKey key = _watcher.poll();
     if( null != key )
