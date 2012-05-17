@@ -3,9 +3,9 @@ package org.realityforge.spydle.store;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.runtime.MetricSource;
 
-public final class SourceEntry
+final class SourceEntry
 {
-  public static final int MAX_BACK_OFF_FACTOR = 5;
+  static final int MAX_BACK_OFF_FACTOR = 5;
   @Nonnull
   private final MetricSource _source;
   private final long _period;
@@ -38,33 +38,33 @@ public final class SourceEntry
     _nextPollTime = time + (long) ( _period * Math.pow( 2, (_failCount - 1) ) );
   }
 
-  public int getFailCount()
+  int getFailCount()
   {
     return _failCount;
   }
 
   @Nonnull
-  public MetricSource getSource()
+  MetricSource getSource()
   {
     return _source;
   }
 
-  public long getPeriod()
+  long getPeriod()
   {
     return _period;
   }
 
-  public long getLastPollTime()
+  long getLastPollTime()
   {
     return _lastPollTime;
   }
 
-  public long getLastFailTime()
+  long getLastFailTime()
   {
     return _lastFailTime;
   }
 
-  public long getNextPollTime()
+  long getNextPollTime()
   {
     return _nextPollTime;
   }
