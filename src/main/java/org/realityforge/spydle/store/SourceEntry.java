@@ -8,15 +8,18 @@ final class SourceEntry
   static final int MAX_BACK_OFF_FACTOR = 5;
   @Nonnull
   private final MetricSource _source;
+  @Nonnull
+  private final String _stage;
   private final long _period;
   private long _lastPollTime;
   private long _lastFailTime;
   private long _nextPollTime;
   private int _failCount;
 
-  SourceEntry( @Nonnull final MetricSource source, final long period )
+  SourceEntry( @Nonnull final MetricSource source, @Nonnull final String stage, final long period )
   {
     _source = source;
+    _stage = stage;
     _period = period;
     poll( System.currentTimeMillis() );
   }
@@ -48,6 +51,12 @@ final class SourceEntry
   MetricSource getSource()
   {
     return _source;
+  }
+
+  @Nonnull
+  String getStage()
+  {
+    return _stage;
   }
 
   long getPeriod()

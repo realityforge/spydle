@@ -102,6 +102,7 @@ public final class MonitorDataStore
 
   public synchronized void registerSource( @Nonnull final String key,
                                            @Nonnull final MetricSource source,
+                                           @Nonnull final String stage,
                                            final int pollPeriod )
   {
     if( LOG.isLoggable( Level.FINE ) )
@@ -109,7 +110,7 @@ public final class MonitorDataStore
       LOG.fine( "MonitorDataStore.registerSource(" + key + "," + source + ")" );
     }
     deregisterSource( key );
-    final SourceEntry entry = new SourceEntry( source, pollPeriod );
+    final SourceEntry entry = new SourceEntry( source, stage, pollPeriod );
     _sources.put( key, entry );
     _sourceQueue.add( entry );
   }
@@ -128,7 +129,9 @@ public final class MonitorDataStore
     }
   }
 
-  public synchronized void registerSink( @Nonnull final String key, @Nonnull final MetricSink sink )
+  public synchronized void registerSink( @Nonnull final String key,
+                                         @Nonnull final MetricSink sink,
+                                         @Nonnull final String stage )
   {
     if( LOG.isLoggable( Level.FINE ) )
     {

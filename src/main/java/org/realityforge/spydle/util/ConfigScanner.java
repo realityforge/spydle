@@ -28,6 +28,7 @@ public final class ConfigScanner
   implements Closeable
 {
   private static final Logger LOG = Logger.getLogger( ConfigScanner.class.getName() );
+  public static final int DEFAULT_PERIOD = 1000 * 10;
 
   @Nonnull
   private final MonitorDataStore _dataStore;
@@ -123,20 +124,28 @@ public final class ConfigScanner
     {
       final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
       final String type = ConfigUtil.getValue( config, "type", String.class );
-      final int pollPeriod = 1000 * 10;
+
+      // Period really only makes sense for sources
+      final Integer refreshPeriod = ConfigUtil.getValue( config, "period", Integer.class, false );
+      final int pollPeriod = refreshPeriod != null ? refreshPeriod : DEFAULT_PERIOD;
+      String stage = ConfigUtil.getValue( config, "stage", String.class, false );
+      if( null == stage  )
+      {
+        stage = type;
+      }
       switch( type )
       {
         case "in:jmx":
-          _dataStore.registerSource( file.toString(), JmxKit.build( config ), pollPeriod );
+          _dataStore.registerSource( file.toString(), JmxKit.build( config ), stage, pollPeriod );
           break;
         case "in:jdbc":
-          _dataStore.registerSource( file.toString(), JdbcKit.build( config ), pollPeriod );
+          _dataStore.registerSource( file.toString(), JdbcKit.build( config ), stage, pollPeriod );
           break;
         case "out:graphite":
-          _dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );
+          _dataStore.registerSink( file.toString(), GraphiteKit.build( config ), stage );
           break;
         case "out:print":
-          _dataStore.registerSink( file.toString(), PrintKit.build( config ) );
+          _dataStore.registerSink( file.toString(), PrintKit.build( config ), stage );
           break;
         default:
           throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
