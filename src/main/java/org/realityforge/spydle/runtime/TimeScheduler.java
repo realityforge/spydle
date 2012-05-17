@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 
 public class TimeScheduler
 {
-  public static final int DEFAULT_SLEEP_TIME = 1000;
+  public static final int MAX_SLEEP_TIME = 1000;
 
   private static final Logger LOG = Logger.getLogger( TimeScheduler.class.getName() );
 
@@ -57,10 +57,10 @@ public class TimeScheduler
       }
       else
       {
-        return nextPollTime - now;
+        return Math.min( MAX_SLEEP_TIME, nextPollTime - now );
       }
     }
-    return DEFAULT_SLEEP_TIME;
+    return MAX_SLEEP_TIME;
   }
 
   private void run( final TimeEntry entry )
