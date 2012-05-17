@@ -2,24 +2,28 @@ package org.realityforge.spydle.store;
 
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.runtime.MetricSource;
+import org.realityforge.spydle.runtime.MetricValueSet;
+import org.realityforge.spydle.scheduler.TimeTrigger;
 
 final class SourceEntry
+  implements Runnable, TimeTrigger
 {
   static final int MAX_BACK_OFF_FACTOR = 5;
   @Nonnull
+  private final MonitorDataStore _dataStore;
+  @Nonnull
   private final MetricSource _source;
   @Nonnull
-  private final String _stage;
-  private final long _period;
+  private final int _period;
   private long _lastPollTime;
   private long _lastFailTime;
   private long _nextPollTime;
   private int _failCount;
 
-  SourceEntry( @Nonnull final MetricSource source, @Nonnull final String stage, final long period )
+  SourceEntry( @Nonnull final MonitorDataStore dataStore, @Nonnull final MetricSource source, final int period )
   {
+    _dataStore = dataStore;
     _source = source;
-    _stage = stage;
     _period = period;
     poll( System.currentTimeMillis() );
   }
@@ -53,13 +57,29 @@ final class SourceEntry
     return _source;
   }
 
-  @Nonnull
-  String getStage()
+  @Override
+  public void run()
   {
-    return _stage;
+    final long now = System.currentTimeMillis();
+    final MetricValueSet metrics = getSource().poll();
+    if( null == metrics )
+    {
+      fail( now );
+    }
+    else
+    {
+      poll( now );
+      _dataStore.queueRoute( metrics );
+    }
   }
 
-  long getPeriod()
+  @Override
+  public long getTimeAfter( final long moment )
+  {
+    return _nextPollTime;
+  }
+
+  int getPeriod()
   {
     return _period;
   }

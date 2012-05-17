@@ -25,7 +25,7 @@ final class TimeEntry
     _stage = stage;
     _trigger = trigger;
     _target = target;
-    _nextTime = _trigger.getTimeAfter( System.currentTimeMillis() );
+    _nextTime = getTimeTrigger().getTimeAfter( System.currentTimeMillis() );
   }
 
   @Nonnull

@@ -4,13 +4,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.realityforge.spydle.runtime.MetricSink;
 import org.realityforge.spydle.runtime.MetricSource;
 import org.realityforge.spydle.runtime.MetricValueSet;
+import org.realityforge.spydle.scheduler.TimeScheduler;
 
 /**
  * Simple store for sources and sinks of monitoring data.
@@ -19,51 +19,18 @@ public final class MonitorDataStore
   implements Closeable
 {
   private static final Logger LOG = Logger.getLogger( MonitorDataStore.class.getName() );
-  public static final int DEFAULT_SLEEP_TIME = 1000;
 
+  @Nonnull
+  private final TimeScheduler _scheduler;
   private final Map<String, SourceEntry> _sources = new HashMap<>();
-  private final PriorityQueue<SourceEntry> _sourceQueue =
-    new PriorityQueue<>( 10, SourceEntrySchedulingComparator.COMPARATOR );
   private final Map<String, SinkEntry> _sinks = new HashMap<>();
 
-  public long tick( final long now )
+  public MonitorDataStore( @Nonnull final TimeScheduler scheduler )
   {
-    SourceEntry entry;
-    //noinspection LoopStatementThatDoesntLoop
-    while( null != ( entry = _sourceQueue.peek() ) )
-    {
-      final long nextPollTime = entry.getNextPollTime();
-      if( nextPollTime < now )
-      {
-        // Remove top entry from queue
-        _sourceQueue.poll();
-        queuePoll( now, entry );
-      }
-      else
-      {
-        return nextPollTime - now;
-      }
-    }
-    return DEFAULT_SLEEP_TIME;
+    _scheduler = scheduler;
   }
 
-  private void queuePoll( final long now, final SourceEntry entry )
-  {
-    final MetricValueSet metrics = entry.getSource().poll();
-    if( null == metrics )
-    {
-      entry.fail( now );
-    }
-    else
-    {
-      entry.poll( now );
-      queueRoute( metrics );
-    }
-    //Re add entry into queue
-    _sourceQueue.add( entry );
-  }
-
-  private void queueRoute( final MetricValueSet metrics )
+  void queueRoute( final MetricValueSet metrics )
   {
     for( final SinkEntry sink : _sinks.values() )
     {
@@ -83,9 +50,9 @@ public final class MonitorDataStore
     for( final Map.Entry<String, SourceEntry> entry : _sources.entrySet() )
     {
       doClose( entry.getKey(), entry.getValue().getSource() );
+      _scheduler.removeTrigger( entry.getKey() );
     }
     _sources.clear();
-    _sourceQueue.clear();
     for( final Map.Entry<String, SinkEntry> entry : _sinks.entrySet() )
     {
       doClose( entry.getKey(), entry.getValue().getSink() );
@@ -110,9 +77,9 @@ public final class MonitorDataStore
       LOG.fine( "MonitorDataStore.registerSource(" + key + "," + source + ")" );
     }
     deregisterSource( key );
-    final SourceEntry entry = new SourceEntry( source, stage, pollPeriod );
+    final SourceEntry entry = new SourceEntry( this, source, pollPeriod );
     _sources.put( key, entry );
-    _sourceQueue.add( entry );
+    _scheduler.addTrigger( key, stage, entry, entry );
   }
 
   public synchronized void deregisterSource( @Nonnull final String key )
@@ -124,7 +91,7 @@ public final class MonitorDataStore
     }
     if( null != existing )
     {
-      _sourceQueue.remove( existing );
+      _scheduler.removeTrigger( key );
       doClose( key, existing.getSource() );
     }
   }

@@ -6,6 +6,7 @@ import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
+import org.realityforge.spydle.scheduler.TimeScheduler;
 import org.realityforge.spydle.store.MonitorDataStore;
 import org.realityforge.spydle.util.ConfigScanner;
 
@@ -37,7 +38,8 @@ public class Main
 
   private static boolean c_verbose;
   private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY ).getAbsoluteFile();
-  private static MonitorDataStore c_dataStore = new MonitorDataStore();
+  public static final TimeScheduler c_scheduler = new TimeScheduler();
+  private static final MonitorDataStore c_dataStore = new MonitorDataStore( c_scheduler );
 
   public static void main( final String[] args )
     throws Exception
@@ -54,7 +56,7 @@ public class Main
     for( int i = 0; i < 10000000; i++ )
     {
       scanner.scan();
-      final long sleepTime = c_dataStore.tick( System.currentTimeMillis() );
+      final long sleepTime = c_scheduler.tick( System.currentTimeMillis() );
       System.out.println( "sleepTime = " + sleepTime );
       if( sleepTime > 200 )
       {

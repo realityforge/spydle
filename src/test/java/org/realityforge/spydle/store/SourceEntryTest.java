@@ -1,9 +1,9 @@
 package org.realityforge.spydle.store;
 
 import org.realityforge.spydle.runtime.TestMetricSource;
-import org.testng.Assert;
+import org.realityforge.spydle.scheduler.TimeScheduler;
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * Utility class to help sort SourceEntry according to due time.
@@ -16,7 +16,7 @@ public final class SourceEntryTest
     final long now = System.currentTimeMillis();
     final TestMetricSource source = new TestMetricSource();
     final int period = 100;
-    final SourceEntry entry1 = new SourceEntry( source, period );
+    final SourceEntry entry1 = new SourceEntry( new MonitorDataStore( new TimeScheduler() ), source, period );
 
     assertEquals( entry1.getSource(), source );
     assertEquals( entry1.getPeriod(), period );
