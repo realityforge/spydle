@@ -1,9 +1,9 @@
 package org.realityforge.spydle.runtime;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -37,18 +37,27 @@ public final class ExecutionEngine
     ThreadPoolExecutor executor = _executors.get( stage );
     if( null == executor )
     {
-      executor = newExecutor();
+      executor = newExecutor( stage );
       _executors.put( stage, executor );
     }
     return executor;
   }
 
-  private ThreadPoolExecutor newExecutor()
+  private ThreadPoolExecutor newExecutor( @Nonnull final String stage )
   {
     return new ThreadPoolExecutor( 0,
                                    4,
-                                   0L,
-                                   TimeUnit.MILLISECONDS,
-                                   new LinkedBlockingQueue<Runnable>() );
+                                   1L,
+                                   TimeUnit.SECONDS,
+                                   new LinkedBlockingQueue<Runnable>(), new ThreadFactory()
+    {
+      private int _threadID;
+
+      @Override
+      public Thread newThread( final Runnable r )
+      {
+        return new Thread( r, "Stage: " + stage + "-" + ( ++_threadID ) );
+      }
+    } );
   }
 }
