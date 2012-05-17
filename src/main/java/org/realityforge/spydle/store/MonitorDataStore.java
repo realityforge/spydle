@@ -24,7 +24,6 @@ public final class MonitorDataStore
 
   @Override
   public void close()
-    throws IOException
   {
     _sources.clear();
     _sinks.clear();
