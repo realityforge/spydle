@@ -24,48 +24,18 @@ public final class MonitorDataStore
 
   @Override
   public void close()
-    throws IOException
   {
-    IOException problem = null;
     LOG.info( "Closing router" );
-    for( final MetricSink sink : _sinks.values() )
+    for( final Map.Entry<String, MetricSource> entry : _sources.entrySet() )
     {
-      if( sink instanceof Closeable )
-      {
-        try
-        {
-          ( (Closeable) sink ).close();
-        }
-        catch( final IOException ioe )
-        {
-          ioe.fillInStackTrace();
-          LOG.log( Level.WARNING, "Problem closing sink " + sink, ioe );
-          problem = ioe;
-        }
-      }
-    }
-    for( final MetricSource source : _sources.values() )
-    {
-      if( source instanceof Closeable )
-      {
-        try
-        {
-          ( (Closeable) source ).close();
-        }
-        catch( final IOException ioe )
-        {
-          ioe.fillInStackTrace();
-          LOG.log( Level.WARNING, "Problem closing source " + source, ioe );
-          problem = ioe;
-        }
-      }
+      doClose( entry.getKey(), entry.getValue() );
     }
     _sources.clear();
-    _sinks.clear();
-    if( null != problem )
+    for( final Map.Entry<String, MetricSink> entry : _sinks.entrySet() )
     {
-      throw problem;
+      doClose( entry.getKey(), entry.getValue() );
     }
+    _sinks.clear();
   }
 
   public void registerSource( @Nonnull final String key, @Nonnull final MetricSource source )
@@ -90,6 +60,11 @@ public final class MonitorDataStore
     {
       LOG.fine( "MonitorDataStore.deregisterSource(" + key + ") => " + existing );
     }
+    doClose( key, existing );
+  }
+
+  private void doClose( final String key, final MetricSource existing )
+  {
     if( existing instanceof Closeable )
     {
       try
@@ -125,6 +100,11 @@ public final class MonitorDataStore
     {
       LOG.fine( "MonitorDataStore.deregisterSink(" + key + ") => " + existing );
     }
+    doClose( key, existing );
+  }
+
+  private void doClose( final String key, final MetricSink existing )
+  {
     if( existing instanceof Closeable )
     {
       try
