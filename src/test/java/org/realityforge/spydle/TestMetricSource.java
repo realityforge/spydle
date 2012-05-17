@@ -1,8 +1,6 @@
 package org.realityforge.spydle;
 
 import javax.annotation.Nullable;
-import org.realityforge.spydle.MetricSource;
-import org.realityforge.spydle.MetricValueSet;
 
 /**
  * A metric source used in tests

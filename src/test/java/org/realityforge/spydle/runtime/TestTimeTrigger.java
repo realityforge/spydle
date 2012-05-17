@@ -1,7 +1,5 @@
 package org.realityforge.spydle.runtime;
 
-import org.realityforge.spydle.runtime.TimeTrigger;
-
 public class TestTimeTrigger
   implements TimeTrigger
 {
