@@ -12,6 +12,7 @@ import org.realityforge.spydle.MetricName;
 import org.realityforge.spydle.MetricSink;
 import org.realityforge.spydle.MetricValue;
 import org.realityforge.spydle.MetricValueSet;
+import org.realityforge.spydle.Namespace;
 
 public final class GraphiteService
   implements Closeable, MetricSink
@@ -38,14 +39,19 @@ public final class GraphiteService
       if( null != prefix )
       {
         sb.append( prefix );
+      }
+      final MetricName name = metric.getName();
+      final Namespace namespace = name.getNamespace();
+      for( final String value : namespace.getNameComponents().values() )
+      {
         if( sb.length() > 0 )
         {
           sb.append( '.' );
         }
+        sb.append( value.replace( '.','_' ) );
       }
-
-      final MetricName name = metric.getName();
-      sb.append( name.getNamespace().toString().replace( '.', '_' ).replace( ',', '.' ) + '.' + name.getKey() );
+      sb.append( '.' );
+      sb.append( name.getKey() );
       sb.append( ' ' );
       sb.append( metric.getValue() );
       sb.append( ' ' );
