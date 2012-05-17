@@ -15,11 +15,11 @@ import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.realityforge.spydle.runtime.graphite.GraphiteKit;
-import org.realityforge.spydle.runtime.jdbc.JdbcKit;
-import org.realityforge.spydle.runtime.jmx.JmxKit;
-import org.realityforge.spydle.runtime.print.PrintKit;
-import org.realityforge.spydle.store.MonitorDataStore;
+import org.realityforge.spydle.graphite.GraphiteKit;
+import org.realityforge.spydle.jdbc.JdbcKit;
+import org.realityforge.spydle.jmx.JmxKit;
+import org.realityforge.spydle.print.PrintKit;
+import org.realityforge.spydle.runtime.MonitorDataStore;
 
 /**
  * Utility class that monitors a configuration directory and updates data store when configuration changes.

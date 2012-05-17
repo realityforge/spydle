@@ -6,8 +6,8 @@ import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
-import org.realityforge.spydle.scheduler.TimeScheduler;
-import org.realityforge.spydle.store.MonitorDataStore;
+import org.realityforge.spydle.runtime.MonitorDataStore;
+import org.realityforge.spydle.runtime.TimeScheduler;
 import org.realityforge.spydle.util.ConfigScanner;
 
 public class Main

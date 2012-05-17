@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.json.simple.JSONObject;
-import org.realityforge.spydle.runtime.Namespace;
+import org.realityforge.spydle.Namespace;
 
 /**
  * Utility class for processing json configuration files.
