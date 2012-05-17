@@ -75,12 +75,17 @@ public final class MonitorDataStore
     {
       LOG.fine( "MonitorDataStore.registerSource(" + key + "," + source + ")" );
     }
-    deregisterSource( key );
+    doDeregisterSource( key, _sources.remove( key ) );
     final SourceEntry entry = new SourceEntry( this, source, pollPeriod );
     _sources.put( key, entry );
     _scheduler.addTrigger( key, stage, entry, entry );
   }
 
+  public synchronized boolean isSourceRegistered( @Nonnull final String key )
+  {
+    return null != _sources.remove( key );
+  }
+  
   public synchronized void deregisterSource( @Nonnull final String key )
   {
     final SourceEntry existing = _sources.remove( key );
@@ -88,6 +93,11 @@ public final class MonitorDataStore
     {
       LOG.fine( "MonitorDataStore.deregisterSource(" + key + ") => " + existing );
     }
+    doDeregisterSource( key, existing );
+  }
+
+  private void doDeregisterSource( final String key, final SourceEntry existing )
+  {
     if( null != existing )
     {
       _scheduler.removeTrigger( key );
@@ -103,8 +113,13 @@ public final class MonitorDataStore
     {
       LOG.fine( "MonitorDataStore.registerSink(" + key + "," + sink + ")" );
     }
-    deregisterSink( key );
+    doDeregisterSink( key, _sinks.remove( key ) );
     _sinks.put( key, new SinkEntry( sink, stage ) );
+  }
+
+  public synchronized boolean isSinkRegistered( @Nonnull final String key )
+  {
+    return null != _sinks.remove( key );
   }
 
   public synchronized void deregisterSink( @Nonnull final String key )
@@ -114,6 +129,11 @@ public final class MonitorDataStore
     {
       LOG.fine( "MonitorDataStore.deregisterSink(" + key + ") => " + existing );
     }
+    doDeregisterSink( key, existing );
+  }
+
+  private void doDeregisterSink( final String key, final SinkEntry existing )
+  {
     if( null != existing )
     {
       doClose( key, existing.getSink() );

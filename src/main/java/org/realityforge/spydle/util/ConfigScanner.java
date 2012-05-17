@@ -104,12 +104,12 @@ public final class ConfigScanner
             else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
             {
               LOG.info( "Configuration file removed: " + file );
-              _dataStore.deregisterSource( file.toString() );
+              unloadConfiguration( file );
             }
             else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
             {
               LOG.info( "Configuration file modified: " + file );
-              _dataStore.deregisterSource( file.toString() );
+              unloadConfiguration( file );
               loadConfiguration( file );
             }
           }
@@ -119,7 +119,20 @@ public final class ConfigScanner
     }
   }
 
-  private void loadConfiguration( final File file )
+  private void unloadConfiguration( @Nonnull final File file )
+  {
+    final String key = file.toString();
+    if( _dataStore.isSourceRegistered( key ) )
+    {
+      _dataStore.deregisterSource( key );
+    }
+    else if( _dataStore.isSinkRegistered( key ) )
+    {
+      _dataStore.deregisterSink( key );
+    }
+  }
+
+  private void loadConfiguration( @Nonnull final File file )
   {
     try
     {
