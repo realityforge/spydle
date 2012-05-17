@@ -6,10 +6,7 @@ import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
-import org.realityforge.spydle.runtime.ExecutionEngine;
-import org.realityforge.spydle.runtime.MonitorDataStore;
-import org.realityforge.spydle.runtime.TimeScheduler;
-import org.realityforge.spydle.util.ConfigScanner;
+import org.realityforge.spydle.runtime.SpydleRuntime;
 
 public class Main
 {
@@ -39,8 +36,6 @@ public class Main
 
   private static boolean c_verbose;
   private static File c_configDirectory = new File( DEFAULT_CONFIG_DIRECTORY ).getAbsoluteFile();
-  public static final TimeScheduler c_scheduler = new TimeScheduler(new ExecutionEngine() );
-  private static final MonitorDataStore c_dataStore = new MonitorDataStore( c_scheduler );
 
   public static void main( final String[] args )
     throws Exception
@@ -51,14 +46,25 @@ public class Main
       return;
     }
 
-    final ConfigScanner scanner = new ConfigScanner( c_dataStore, c_configDirectory );
-    scanner.start();
+    final SpydleRuntime runtime = new SpydleRuntime();
 
-    for( int i = 0; i < 10000000; i++ )
+    Runtime.getRuntime().addShutdownHook( new Thread()
     {
-      scanner.scan();
-      final long sleepTime = c_scheduler.tick( System.currentTimeMillis() );
-      System.out.println( "sleepTime = " + sleepTime );
+      @Override
+      public void run()
+      {
+        runtime.stop();
+        System.exit( SUCCESS_EXIT_CODE );
+      }
+    } );
+
+    runtime.start( c_configDirectory );
+
+    //noinspection InfiniteLoopStatement
+    while( true )
+    {
+      runtime.getScanner().scan();
+      final long sleepTime = runtime.getScheduler().tick( System.currentTimeMillis() );
       if( sleepTime > 200 )
       {
         System.gc();
@@ -66,16 +72,7 @@ public class Main
       Thread.sleep( sleepTime );
     }
 
-    Runtime.getRuntime().addShutdownHook( new Thread()
-    {
-      @Override
-      public void run()
-      {
-        c_dataStore.close();
-        scanner.close();
-        System.exit( SUCCESS_EXIT_CODE );
-      }
-    } );
+
   }
 
   private static boolean processOptions( final String[] args )
