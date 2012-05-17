@@ -148,7 +148,7 @@ public final class JdbcService
       {
         final String columnName = entry.getKey();
         final Object value = resultSet.getObject( columnName );
-        metrics.add( new MetricValue( probe.generateKey( key, entry.getKey() ), (Number) value ) );
+        metrics.add( new MetricValue( probe.generateKey( key, columnName ), (Number) value ) );
       }
     }
     resultSet.close();
