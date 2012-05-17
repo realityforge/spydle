@@ -20,11 +20,11 @@ public final class MonitorDataStore
   private static final Logger LOG = Logger.getLogger( MonitorDataStore.class.getName() );
 
   @Nonnull
-  private final TimeScheduler _scheduler;
+  private final Scheduler _scheduler;
   private final Map<String, SourceEntry> _sources = new HashMap<>();
   private final Map<String, SinkEntry> _sinks = new HashMap<>();
 
-  public MonitorDataStore( @Nonnull final TimeScheduler scheduler )
+  public MonitorDataStore( @Nonnull final Scheduler scheduler )
   {
     _scheduler = scheduler;
   }

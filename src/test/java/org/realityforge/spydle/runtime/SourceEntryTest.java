@@ -15,7 +15,7 @@ public final class SourceEntryTest
     final long now = System.currentTimeMillis();
     final TestMetricSource source = new TestMetricSource();
     final int period = 100;
-    final SourceEntry entry1 = new SourceEntry( new MonitorDataStore( new TimeScheduler( new ExecutionEngine() ) ), source, period );
+    final SourceEntry entry1 = new SourceEntry( new MonitorDataStore( new Scheduler( new ExecutionEngine() ) ), source, period );
 
     assertEquals( entry1.getSource(), source );
     assertEquals( entry1.getPeriod(), period );

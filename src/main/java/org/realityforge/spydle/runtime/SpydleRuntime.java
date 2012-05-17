@@ -10,7 +10,7 @@ import org.realityforge.spydle.util.ConfigScanner;
 public class SpydleRuntime
 {
   private final ExecutionEngine _executionEngine = new ExecutionEngine();
-  private final TimeScheduler _scheduler = new TimeScheduler( _executionEngine );
+  private final Scheduler _scheduler = new Scheduler( _executionEngine );
   private final MonitorDataStore _dataStore = new MonitorDataStore( _scheduler );
 
   private File _configDirectory;
@@ -66,7 +66,7 @@ public class SpydleRuntime
     return _executionEngine;
   }
 
-  public TimeScheduler getScheduler()
+  public Scheduler getScheduler()
   {
     return _scheduler;
   }

@@ -6,18 +6,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
-public class TimeScheduler
+public class Scheduler
 {
   public static final int MAX_SLEEP_TIME = 1000;
 
-  private static final Logger LOG = Logger.getLogger( TimeScheduler.class.getName() );
+  private static final Logger LOG = Logger.getLogger( Scheduler.class.getName() );
 
   @Nonnull
   private final ExecutionEngine _executionEngine;
   private final HashMap<String, TimeEntry> _entryMap = new HashMap<>();
   private final PriorityQueue<TimeEntry> _queue = new PriorityQueue<>( 10, TimeEntryComparator.COMPARATOR );
 
-  public TimeScheduler( @Nonnull final ExecutionEngine executionEngine )
+  public Scheduler( @Nonnull final ExecutionEngine executionEngine )
   {
     _executionEngine = executionEngine;
   }
