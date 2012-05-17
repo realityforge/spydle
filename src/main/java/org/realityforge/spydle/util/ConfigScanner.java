@@ -45,15 +45,21 @@ public final class ConfigScanner
 
   @Override
   public void close()
-    throws IOException
   {
-    _watcher.close();
+    try
+    {
+      _watcher.close();
+    }
+    catch( final Throwable t )
+    {
+      LOG.log( Level.WARNING, "Error closing watcher", t );
+    }
   }
 
   public void start()
     throws IOException
   {
-    _dataStore.close();
+    _dataStore.clear();
     _watcher = FileSystems.getDefault().newWatchService();
 
     _configDirectory.toPath().
@@ -117,13 +123,14 @@ public final class ConfigScanner
     {
       final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
       final String type = ConfigUtil.getValue( config, "type", String.class );
+      final int pollPeriod = 1000 * 10;
       switch( type )
       {
         case "in:jmx":
-          _dataStore.registerSource( file.toString(), JmxKit.build( config ) );
+          _dataStore.registerSource( file.toString(), JmxKit.build( config ), pollPeriod );
           break;
         case "in:jdbc":
-          _dataStore.registerSource( file.toString(), JdbcKit.build( config ) );
+          _dataStore.registerSource( file.toString(), JdbcKit.build( config ), pollPeriod );
           break;
         case "out:graphite":
           _dataStore.registerSink( file.toString(), GraphiteKit.build( config ) );

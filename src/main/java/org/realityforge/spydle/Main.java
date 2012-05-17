@@ -1,13 +1,11 @@
 package org.realityforge.spydle;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import org.realityforge.cli.CLArgsParser;
 import org.realityforge.cli.CLOption;
 import org.realityforge.cli.CLOptionDescriptor;
 import org.realityforge.cli.CLUtil;
-import org.realityforge.spydle.store.MetricRouter;
 import org.realityforge.spydle.store.MonitorDataStore;
 import org.realityforge.spydle.util.ConfigScanner;
 
@@ -53,13 +51,12 @@ public class Main
     final ConfigScanner scanner = new ConfigScanner( c_dataStore, c_configDirectory );
     scanner.start();
 
-    final MetricRouter router = new MetricRouter( c_dataStore );
-
     for( int i = 0; i < 10000000; i++ )
     {
       scanner.scan();
-      router.tick();
-      Thread.sleep( 100 );
+      final long sleepTime = c_dataStore.tick( System.currentTimeMillis() );
+      System.out.println( "sleepTime = " + sleepTime );
+      Thread.sleep( sleepTime );
     }
 
     Runtime.getRuntime().addShutdownHook( new Thread()
@@ -67,23 +64,8 @@ public class Main
       @Override
       public void run()
       {
-        try
-        {
-          c_dataStore.close();
-        }
-        catch( final IOException ioe )
-        {
-          //Ignored
-        }
-        try
-        {
-          scanner.close();
-        }
-        catch( final IOException ioe )
-        {
-          //Ignored
-        }
-
+        c_dataStore.close();
+        scanner.close();
         System.exit( SUCCESS_EXIT_CODE );
       }
     } );
