@@ -9,8 +9,6 @@ import javax.annotation.Nullable;
  */
 public final class GraphiteServiceDescriptor
 {
-  public static final int DEFAULT_PORT = 2003;
-
   private final InetSocketAddress _socketAddress;
   @Nonnull
   private final String _host;
