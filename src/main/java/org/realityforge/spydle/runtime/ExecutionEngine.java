@@ -1,5 +1,7 @@
 package org.realityforge.spydle.runtime;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -12,12 +14,22 @@ import javax.annotation.Nonnull;
  * in the same stage.
  */
 public final class ExecutionEngine
+  implements Closeable
 {
   private final HashMap<String, ThreadPoolExecutor> _executors = new HashMap<>();
 
   public void execute( @Nonnull final String stage, @Nonnull final Runnable runnable )
   {
     getExecutorForStage( stage ).execute( runnable );
+  }
+
+  @Override
+  public void close()
+  {
+    for( final ThreadPoolExecutor executor : _executors.values() )
+    {
+      executor.shutdownNow();
+    }
   }
 
   private ThreadPoolExecutor getExecutorForStage( @Nonnull final String stage )

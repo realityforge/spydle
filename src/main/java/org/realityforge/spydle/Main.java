@@ -31,7 +31,6 @@ public class Main
                             "the directory in which configuration is read from. Defaults to " + DEFAULT_CONFIG_DIRECTORY ),
   };
 
-  private static final int SUCCESS_EXIT_CODE = 0;
   private static final int ERROR_PARSING_ARGS_EXIT_CODE = 1;
 
   private static boolean c_verbose;
@@ -48,31 +47,23 @@ public class Main
 
     final SpydleRuntime runtime = new SpydleRuntime();
 
-    Runtime.getRuntime().addShutdownHook( new Thread()
-    {
-      @Override
-      public void run()
-      {
-        runtime.stop();
-        System.exit( SUCCESS_EXIT_CODE );
-      }
-    } );
-
     runtime.start( c_configDirectory );
 
     //noinspection InfiniteLoopStatement
     while( true )
     {
-      runtime.getScanner().scan();
       final long sleepTime = runtime.getScheduler().tick( System.currentTimeMillis() );
-      if( sleepTime > 200 )
+      try
       {
-        System.gc();
+        Thread.sleep( sleepTime );
       }
-      Thread.sleep( sleepTime );
+      catch( final InterruptedException ie )
+      {
+        //Ignored
+      }
     }
-
-
+    //runtime.stop();
+    //System.exit( SUCCESS_EXIT_CODE );
   }
 
   private static boolean processOptions( final String[] args )

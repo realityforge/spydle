@@ -25,7 +25,24 @@ public class SpydleRuntime
     }
     _configDirectory = configDirectory;
     _scanner = new ConfigScanner( getDataStore(), _configDirectory );
-    _scanner.start();
+    getScanner().start();
+    getScheduler().addTrigger( "Scanner", "system", new PeriodicTimeTrigger( 200 ), new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        getScanner().scan();
+      }
+    } );
+
+    getScheduler().addTrigger( "GC", "system", new PeriodicTimeTrigger( 1000 ), new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        System.gc();
+      }
+    } );
   }
 
   public void stop()
@@ -33,7 +50,8 @@ public class SpydleRuntime
     if( null != _configDirectory )
     {
       getDataStore().close();
-      _scanner.close();
+      getExecutionEngine().close();
+      getScanner().close();
       _configDirectory = null;
     }
   }
