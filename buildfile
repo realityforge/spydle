@@ -7,12 +7,12 @@ define('spydle') do
   compile.options.lint = 'all'
 
   compile.with :javax_annotation,
-               :spice_cli,
+               :getopt4j,
                :json_simple
 
   package(:jar)
   package(:jar, :classifier => 'all').tap do |pkg|
-    pkg.merge(artifacts([:spice_cli,:json_simple]))
+    pkg.merge(artifacts([:getopt4j,:json_simple]))
     pkg.with :manifest => manifest.merge( 'Main-Class' => 'org.realityforge.spydle.Main' )
   end
 

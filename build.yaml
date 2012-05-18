@@ -10,7 +10,7 @@ repositories:
 
 artifacts:
   javax_annotation: com.google.code.findbugs:jsr305:jar:1.3.9
-  spice_cli: spice:spice-cli:jar:1.0
+  getopt4j: org.realityforge:getopt4j:jar:1.0
   json_simple: com.googlecode.json-simple:json-simple:jar:1.1
 
   #

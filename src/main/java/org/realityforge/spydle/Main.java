@@ -2,10 +2,10 @@ package org.realityforge.spydle;
 
 import java.io.File;
 import java.util.List;
-import org.realityforge.cli.CLArgsParser;
-import org.realityforge.cli.CLOption;
-import org.realityforge.cli.CLOptionDescriptor;
-import org.realityforge.cli.CLUtil;
+import org.realityforge.getopt4j.CLArgsParser;
+import org.realityforge.getopt4j.CLOption;
+import org.realityforge.getopt4j.CLOptionDescriptor;
+import org.realityforge.getopt4j.CLUtil;
 import org.realityforge.spydle.runtime.SpydleRuntime;
 
 public final class Main
