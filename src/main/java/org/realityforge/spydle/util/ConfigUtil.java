@@ -73,6 +73,7 @@ public final class ConfigUtil
    * @return the value.
    * @throws IllegalArgumentException if value is the incorrect type or the value is missing and ensure is true.
    */
+  @SuppressWarnings( "unchecked" )
   @Nullable
   public static <T> T getValue( @Nonnull final JSONObject config,
                                 @Nonnull final String key,
@@ -97,7 +98,6 @@ public final class ConfigUtil
     }
     else
     {
-      //noinspection unchecked
       return (T) value;
     }
   }
