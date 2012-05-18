@@ -12,7 +12,6 @@ define('spydle') do
                :hsqldb
 
   package(:jar)
-  package(:sources)
 
   test.using :testng
   test.compile.with :mockito
