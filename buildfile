@@ -11,6 +11,10 @@ define('spydle') do
                :json_simple
 
   package(:jar)
+  package(:jar, :classifier => 'all').tap do |pkg|
+    pkg.merge(artifacts([:spice_cli,:json_simple]))
+    pkg.with :manifest => manifest.merge( 'Main-Class' => 'org.realityforge.spydle.Main' )
+  end
 
   test.using :testng
   test.compile.with :mockito
