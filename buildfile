@@ -1,5 +1,3 @@
-require 'buildr/java/emma'
-
 desc "Spydle: Lightweight Monitoring Software"
 define('spydle') do
   project.version = `git describe --tags --always`.strip
@@ -18,6 +16,4 @@ define('spydle') do
 
   test.using :testng
   test.compile.with :mockito
-
-  emma.include 'org.realityforge.*'
 end
