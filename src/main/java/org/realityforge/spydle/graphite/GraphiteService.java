@@ -48,9 +48,10 @@ public final class GraphiteService
         {
           sb.append( '.' );
         }
-        sb.append( value.replace( '.','_' ) );
+        addGraphiteKey( sb, value.replace( '.','_' ) );
       }
       sb.append( '.' );
+      addGraphiteKey( sb, name.getKey() );
       sb.append( name.getKey() );
       sb.append( ' ' );
       sb.append( metric.getValue() );
@@ -77,6 +78,18 @@ public final class GraphiteService
       LOG.log( Level.FINE, "Error writing to graphite server: " + _descriptor, ioe );
       close();
       return false;
+    }
+  }
+
+  private void addGraphiteKey( final StringBuilder sb, final String key )
+  {
+    for ( int i = 0; i < key.length(); i++ )
+    {
+      final char c = key.charAt( i );
+      if ( '_' == c || Character.isLetterOrDigit( c ) )
+      {
+        sb.append( c );
+      }
     }
   }
 
