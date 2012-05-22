@@ -147,19 +147,24 @@ final class ConfigScanner
       {
         stage = type;
       }
+      JSONObject subConfig = ConfigUtil.getValue( config, "config", JSONObject.class, false );
+      if ( null == subConfig )
+      {
+        subConfig = new JSONObject();
+      }
       switch( type )
       {
         case "in:jmx":
-          _dataStore.registerSource( file.toString(), JmxKit.build( config ), stage, pollPeriod );
+          _dataStore.registerSource( file.toString(), JmxKit.build( subConfig ), stage, pollPeriod );
           break;
         case "in:jdbc":
-          _dataStore.registerSource( file.toString(), JdbcKit.build( config ), stage, pollPeriod );
+          _dataStore.registerSource( file.toString(), JdbcKit.build( subConfig ), stage, pollPeriod );
           break;
         case "out:graphite":
-          _dataStore.registerSink( file.toString(), GraphiteKit.build( config ), stage );
+          _dataStore.registerSink( file.toString(), GraphiteKit.build( subConfig ), stage );
           break;
         case "out:print":
-          _dataStore.registerSink( file.toString(), PrintKit.build( config ), stage );
+          _dataStore.registerSink( file.toString(), PrintKit.build( subConfig ), stage );
           break;
         default:
           throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
