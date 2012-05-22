@@ -52,7 +52,6 @@ public final class GraphiteService
       }
       sb.append( '.' );
       addGraphiteKey( sb, name.getKey() );
-      sb.append( name.getKey() );
       sb.append( ' ' );
       sb.append( metric.getValue() );
       sb.append( ' ' );
