@@ -5,4 +5,6 @@
 /reports
 /conf.d
 /docs
-_buildr.rb
+/_buildr.rb
+/bin
+/.bundle
