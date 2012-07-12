@@ -3,6 +3,11 @@ package org.realityforge.spydle.util;
 import java.util.LinkedHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.naming.NamingException;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import org.json.simple.JSONObject;
 import org.realityforge.spydle.Namespace;
 
@@ -25,15 +30,31 @@ public final class ConfigUtil
   @Nullable
   public static Namespace parseNamespace( final JSONObject config )
   {
-    final JSONObject namespace = getValue( config, "namespace", JSONObject.class, false );
+    final String namespace = getValue( config, "namespace", String.class, false );
     if( null != namespace )
     {
-      final LinkedHashMap<String, String> map = new LinkedHashMap<>();
-      for( final Object key : namespace.keySet() )
+      try
       {
-        map.put( key.toString(), String.valueOf( namespace.get( key ) ) );
+        final LdapName name = new LdapName( namespace );
+        final LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        for( final Rdn rdn : name.getRdns() )
+        {
+          final Attributes attributes = rdn.toAttributes();
+
+          if( attributes.size() != 1 )
+          {
+            throw new IllegalArgumentException( "Invalid namespace component: " + rdn );
+          }
+          final String key = attributes.getIDs().next();
+          final Attribute attribute = attributes.get( key );
+          map.put( key, attribute.get().toString() );
+        }
+        return new Namespace( map );
       }
-      return new Namespace( map );
+      catch( final NamingException ne )
+      {
+        throw new IllegalArgumentException( "Invalid namespace: " + namespace, ne );
+      }
     }
     else
     {
