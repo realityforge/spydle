@@ -179,6 +179,54 @@ public class SyslogMessage
     return result;
   }
 
+  @Override
+  public String toString()
+  {
+    final DateTime ts = getTimestamp();
+    final String timestamp = ts == null ? NILVALUE_STRING : emitTimestamp( ts );
+    final String hostname = getHostname() == null ? NILVALUE_STRING : getHostname();
+    final String appName = getAppName() == null ? NILVALUE_STRING : getAppName();
+    final String procId = getProcId() == null ? NILVALUE_STRING : getProcId();
+    final String msgId = getMsgId() == null ? NILVALUE_STRING : getMsgId();
+    final int pri = getLevel() + ( getFacility() << 3 );
+    final String sd;
+    final Map<String, List<StructuredDataParameter>> structuredData = getStructuredData();
+    if( null != structuredData )
+    {
+      final StringBuilder sb = new StringBuilder();
+      for( final Map.Entry<String, List<StructuredDataParameter>> entry : structuredData.entrySet() )
+      {
+        sb.append( SD_START );
+        sb.append( entry.getKey() );
+        for( final StructuredDataParameter param : entry.getValue() )
+        {
+          sb.append( SP );
+          sb.append( param.getName() );
+          sb.append( SD_ASSIGN );
+          sb.append( SD_VALUE_QUOTE );
+          sb.append( param.getValue() );
+          sb.append( SD_VALUE_QUOTE );
+        }
+
+        sb.append( SD_END );
+      }
+      sd = sb.toString();
+    }
+    else
+    {
+      sd = NILVALUE_STRING;
+    }
+    final String messageSuffix = getMessage() == null ? "" : SP + getMessage();
+    return String.valueOf( PRI_START ) + pri + String.valueOf( PRI_END ) + VERSION +
+           SP + timestamp +
+           SP + hostname +
+           SP + appName +
+           SP + procId +
+           SP + msgId +
+           SP + sd +
+           messageSuffix;
+  }
+
   public static SyslogMessage parseSyslogMessage( final String rawMessage )
   {
     try
