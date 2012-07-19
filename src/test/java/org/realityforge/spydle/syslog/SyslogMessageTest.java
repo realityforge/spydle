@@ -1,8 +1,8 @@
 package org.realityforge.spydle.syslog;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.joda.time.DateTime;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -14,22 +14,29 @@ public class SyslogMessageTest
   {
     return new Object[][]
       {
-        { "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-        { "<34>1 1985-04-12T19:20:50.52-04:00 mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-        { "<34>1 1985-04-12T23:20:50.52Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-        { "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-        { "<34>1 2003-08-24T05:14:15.000003-07:00 mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-        { "<34>1 - mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-        { "<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc 8710 - - %% It's time to make the do-nuts." },
-        { "<165>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"]" },
-        { "<165>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"] - and thats a wrap!" }
+        { "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8", true },
+        { "<34>1 1985-04-12T19:20:50.52-04:00 mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8", false },
+        { "<34>1 1985-04-12T23:20:50.52Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8", false },
+        { "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8", true },
+        { "<34>1 2003-08-24T05:14:15.000003-07:00 mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8", false },
+        { "<34>1 - mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8", true },
+        { "<165>1 2003-08-24T05:14:15.000003-07:00 192.0.2.1 myproc 8710 - - %% It's time to make the do-nuts.", false },
+        { "<165>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"]", true },
+        { "<165>1 2003-10-11T22:14:15.003Z mymachine.example.com evntslog - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"] - and thats a wrap!", true }
       };
   }
 
   @Test( dataProvider = "ValidMessages" )
-  public void parseValidMessages( final String rawMessage )
+  public void parseValidMessages( final String rawMessage1, final boolean expectRawMessageIsBytePerfect )
   {
-    SyslogMessage.parseSyslogMessage( rawMessage );
+    final SyslogMessage syslogMessage1 = SyslogMessage.parseSyslogMessage( rawMessage1 );
+    final String rawMessage2 = syslogMessage1.toString();
+    if( expectRawMessageIsBytePerfect )
+    {
+      assertEquals( rawMessage1, rawMessage2 );
+    }
+    final SyslogMessage syslogMessage2 = SyslogMessage.parseSyslogMessage( rawMessage2 );
+    assertEquals( syslogMessage1, syslogMessage2 );
   }
 
   @Test
@@ -39,9 +46,9 @@ public class SyslogMessageTest
       SyslogMessage.parseSyslogMessage( "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"] BOM'su root' failed for lonvick on /dev/pts/8" );
     assertEquals( message.getFacility(), 4 );
     assertEquals( message.getLevel(), 2 );
-    final Date timestamp = message.getTimestamp();
+    final DateTime timestamp = message.getTimestamp();
     assertNotNull( timestamp );
-    assertEquals( timestamp.getTime(), 1065910455003L );
+    assertEquals( timestamp.toDate().getTime(), 1065910455003L );
     assertEquals( message.getHostname(), "mymachine.example.com" );
     assertEquals( message.getAppName(), "su" );
     assertNull( message.getProcId() );
