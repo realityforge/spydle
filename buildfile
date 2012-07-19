@@ -7,6 +7,7 @@ define('spydle') do
   compile.options.lint = 'all'
 
   compile.with :javax_annotation,
+               :joda_time,
                :getopt4j,
                :json_simple
 

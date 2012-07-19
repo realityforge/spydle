@@ -9,6 +9,7 @@ artifacts:
   javax_annotation: com.google.code.findbugs:jsr305:jar:1.3.9
   getopt4j: org.realityforge:getopt4j:jar:1.0
   json_simple: com.googlecode.json-simple:json-simple:jar:1.1
+  joda_time: joda-time:joda-time:jar:1.6
 
   #
   # Mocking library
