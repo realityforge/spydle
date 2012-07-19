@@ -156,6 +156,15 @@ NILVALUE        = "-"
     final String procIdString = message.substring( startProcId, endProcId );
     final String procId = "-".equals( procIdString ) ? null : procIdString;
 
-    return new SyslogMessage( facility, level, timestamp, hostname, appName, procId );
+    final int startMsgId = endProcId + 1;
+    final int endMsgId = message.indexOf( SP, startMsgId );
+    if( -1 == endMsgId )
+    {
+      throw new IllegalArgumentException( "Message truncated after MsgId: " + message );
+    }
+    final String msgIdString = message.substring( startMsgId, endMsgId );
+    final String msgId = "-".equals( msgIdString ) ? null : msgIdString;
+
+    return new SyslogMessage( facility, level, timestamp, hostname, appName, procId, msgId );
   }
 }
