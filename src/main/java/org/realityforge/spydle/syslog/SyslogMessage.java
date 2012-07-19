@@ -13,18 +13,22 @@ public class SyslogMessage
   private final String _hostname;
   @Nullable
   private final String _appName;
+  @Nullable
+  private final String _procId;
 
   public SyslogMessage( final int facility,
                         final int level,
                         final Date timestamp,
                         final String hostname,
-                        final String appName )
+                        final String appName,
+                        final String procId )
   {
     _facility = facility;
     _level = level;
     _timestamp = timestamp;
     _hostname = hostname;
     _appName = appName;
+    _procId = procId;
   }
 
   public int getFacility()
@@ -53,5 +57,11 @@ public class SyslogMessage
   public String getAppName()
   {
     return _appName;
+  }
+
+  @Nullable
+  public String getProcId()
+  {
+    return _procId;
   }
 }

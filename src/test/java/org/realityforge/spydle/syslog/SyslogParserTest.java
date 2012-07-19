@@ -55,5 +55,6 @@ public class SyslogParserTest
     assertEquals( timestamp.getTime(), 1065910455003L );
     assertEquals( message.getHostname(), "mymachine.example.com" );
     assertEquals( message.getAppName(), "su" );
+    assertNull( message.getProcId() );
   }
 }

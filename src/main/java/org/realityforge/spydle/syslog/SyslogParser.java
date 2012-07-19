@@ -135,19 +135,27 @@ NILVALUE        = "-"
 
     if( SP != message.charAt( endHost ) )
     {
-      throw new IllegalArgumentException( "Unknown content trailing hostname: " + message );
+      throw new IllegalArgumentException( "Unknown content trailing Hostname: " + message );
     }
 
     final int startAppName = endHost + 1;
     final int endAppName = message.indexOf( SP, startAppName );
     if( -1 == endAppName )
     {
-      throw new IllegalArgumentException( "Message truncated after appname: " + message );
+      throw new IllegalArgumentException( "Message truncated after AppName: " + message );
     }
     final String appNameString = message.substring( startAppName, endAppName );
     final String appName = "-".equals( appNameString ) ? null : appNameString;
 
+    final int startProcId = endAppName + 1;
+    final int endProcId = message.indexOf( SP, startProcId );
+    if( -1 == endProcId )
+    {
+      throw new IllegalArgumentException( "Message truncated after ProcId: " + message );
+    }
+    final String procIdString = message.substring( startProcId, endProcId );
+    final String procId = "-".equals( procIdString ) ? null : procIdString;
 
-    return new SyslogMessage( facility, level, timestamp, hostname, appName );
+    return new SyslogMessage( facility, level, timestamp, hostname, appName, procId );
   }
 }
