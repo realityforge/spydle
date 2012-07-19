@@ -204,7 +204,7 @@ public class SyslogMessage
           sb.append( param.getName() );
           sb.append( SD_ASSIGN );
           sb.append( SD_VALUE_QUOTE );
-          sb.append( param.getValue() );
+          sb.append( param.getValue().replace( "\\", "\\\\" ).replace( "]", "\\]" ).replace( "\"", "\\\"" ) );
           sb.append( SD_VALUE_QUOTE );
         }
 
@@ -376,8 +376,8 @@ public class SyslogMessage
               index++;
               if( '\\' == ch )
               {
-                index++;
                 sb.append( rawMessage.charAt( index ) );
+                index++;
               }
               else
               {
