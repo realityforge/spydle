@@ -1,22 +1,32 @@
 package org.realityforge.spydle.syslog;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
 public class SyslogMessage
 {
+  private static final String NILVALUE_STRING = "-";
   private static final char NILVALUE = '-';
   private static final char SP = ' ';
+  private static final char PRI_START = '<';
+  private static final char PRI_END = '>';
+  private static final String VERSION = "1";
+  private static final char SD_END = ']';
+  private static final char SD_START = '[';
+  private static final char SD_VALUE_QUOTE = '"';
+  private static final char SD_ASSIGN = '=';
 
   private final int _facility;
   private final int _level;
   @Nullable
-  private final Date _timestamp;
+  private final DateTime _timestamp;
   @Nullable
   private final String _hostname;
   @Nullable
@@ -32,7 +42,7 @@ public class SyslogMessage
 
   public SyslogMessage( final int facility,
                         final int level,
-                        @Nullable final Date timestamp,
+                        @Nullable final DateTime timestamp,
                         @Nullable final String hostname,
                         @Nullable final String appName,
                         @Nullable final String procId,
@@ -62,7 +72,7 @@ public class SyslogMessage
   }
 
   @Nullable
-  public Date getTimestamp()
+  public DateTime getTimestamp()
   {
     return _timestamp;
   }
@@ -173,14 +183,11 @@ public class SyslogMessage
   {
     try
     {
-      final int facility;
-      final int level;
-      final Date timestamp;
-      if( '<' != rawMessage.charAt( 0 ) )
+      if( PRI_START != rawMessage.charAt( 0 ) )
       {
         throw new IllegalArgumentException( "Missing < to start PRI: " + rawMessage );
       }
-      final int endPri = rawMessage.indexOf( ">" );
+      final int endPri = rawMessage.indexOf( PRI_END );
       if( endPri < 1 || endPri >= 5 )
       {
         throw new IllegalArgumentException( "Missing > to finish PRI: " + rawMessage );
@@ -196,8 +203,8 @@ public class SyslogMessage
         // Failed to parse PRI
         throw new IllegalArgumentException( "Failed to parse PRI: " + rawMessage );
       }
-      facility = priority >> 3;
-      level = priority - ( facility << 3 );
+      final int facility = priority >> 3;
+      final int level = priority - ( facility << 3 );
 
       final int startVersion = endPri + 1;
       final int endVersion = rawMessage.indexOf( SP, startVersion );
@@ -205,13 +212,14 @@ public class SyslogMessage
       {
         throw new IllegalArgumentException( "Missing SP to terminate version: " + rawMessage );
       }
-      if( !"1".equals( rawMessage.substring( startVersion, endVersion ) ) )
+      if( !VERSION.equals( rawMessage.substring( startVersion, endVersion ) ) )
       {
         throw new IllegalArgumentException( "Unknown version: " + rawMessage );
       }
 
       final int startTimestamp = endVersion + 1;
       final int endTimestamp;
+      final DateTime timestamp;
       if( NILVALUE == rawMessage.charAt( startTimestamp ) )
       {
         timestamp = null;
@@ -234,7 +242,7 @@ public class SyslogMessage
         throw new IllegalArgumentException( "Message truncated after host: " + rawMessage );
       }
       final String hostnameString = rawMessage.substring( startHost, endHost );
-      final String hostname = "-".equals( hostnameString ) ? null : hostnameString;
+      final String hostname = NILVALUE_STRING.equals( hostnameString ) ? null : hostnameString;
 
       final int startAppName = endHost + 1;
       final int endAppName = rawMessage.indexOf( SP, startAppName );
@@ -243,7 +251,7 @@ public class SyslogMessage
         throw new IllegalArgumentException( "Message truncated after AppName: " + rawMessage );
       }
       final String appNameString = rawMessage.substring( startAppName, endAppName );
-      final String appName = "-".equals( appNameString ) ? null : appNameString;
+      final String appName = NILVALUE_STRING.equals( appNameString ) ? null : appNameString;
 
       final int startProcId = endAppName + 1;
       final int endProcId = rawMessage.indexOf( SP, startProcId );
@@ -252,7 +260,7 @@ public class SyslogMessage
         throw new IllegalArgumentException( "Message truncated after ProcId: " + rawMessage );
       }
       final String procIdString = rawMessage.substring( startProcId, endProcId );
-      final String procId = "-".equals( procIdString ) ? null : procIdString;
+      final String procId = NILVALUE_STRING.equals( procIdString ) ? null : procIdString;
 
       final int startMsgId = endProcId + 1;
       final int endMsgId = rawMessage.indexOf( SP, startMsgId );
@@ -261,7 +269,7 @@ public class SyslogMessage
         throw new IllegalArgumentException( "Message truncated after MsgId: " + rawMessage );
       }
       final String msgIdString = rawMessage.substring( startMsgId, endMsgId );
-      final String msgId = "-".equals( msgIdString ) ? null : msgIdString;
+      final String msgId = NILVALUE_STRING.equals( msgIdString ) ? null : msgIdString;
 
       final int startStructuredData = endMsgId + 1;
       final int endStructuredData;
@@ -275,7 +283,7 @@ public class SyslogMessage
       {
         structuredData = new HashMap<>();
         int index = startStructuredData;
-        while( '[' == rawMessage.charAt( index ) )
+        while( SD_START == rawMessage.charAt( index ) )
         {
           index += 1;
           final StringBuilder sb = new StringBuilder();
@@ -290,7 +298,7 @@ public class SyslogMessage
           final ArrayList<StructuredDataParameter> params = new ArrayList<>();
           structuredData.put( sdId, params );
           ch = rawMessage.charAt( index );
-          while( ']' != ch )
+          while( SD_END != ch )
           {
             if( SP != ch )
             {
@@ -304,18 +312,18 @@ public class SyslogMessage
             }
             final String key = sb.toString();
             sb.setLength( 0 );
-            if( '=' != rawMessage.charAt( index ) )
+            if( SD_ASSIGN != rawMessage.charAt( index ) )
             {
               throw new IllegalArgumentException( "Param name not followed by =: " + rawMessage );
             }
             index++;
-            if( '"' != rawMessage.charAt( index ) )
+            if( SD_VALUE_QUOTE != rawMessage.charAt( index ) )
             {
               throw new IllegalArgumentException( "Param value not started by \": " + rawMessage );
             }
             index++;
 
-            while( '"' != ( ch = rawMessage.charAt( index ) ) )
+            while( SD_VALUE_QUOTE != ( ch = rawMessage.charAt( index ) ) )
             {
               index++;
               if( '\\' == ch )
@@ -334,7 +342,7 @@ public class SyslogMessage
             params.add( new StructuredDataParameter( key, value ) );
             ch = rawMessage.charAt( index );
           }
-          if( ']' != rawMessage.charAt( index ) )
+          if( SD_END != rawMessage.charAt( index ) )
           {
             throw new IllegalArgumentException( "Missing ] at end of structured data: " + rawMessage );
           }
@@ -378,13 +386,23 @@ public class SyslogMessage
     }
   }
 
-  private static Date parseDateTime( final String dateString )
+  @Nonnull
+  private static DateTime parseDateTime( @Nonnull final String dateString )
   {
-    return ISODateTimeFormat.dateTime().parseDateTime( dateString ).toDate();
+    return ISODateTimeFormat.dateTime().withOffsetParsed().parseDateTime( dateString );
+  }
+
+  @Nonnull
+  private static String emitTimestamp( @Nonnull final DateTime date )
+  {
+    final DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateTime();
+    dateTimeFormatter.withChronology( date.getChronology() );
+    dateTimeFormatter.withZone( date.getZone() );
+    return dateTimeFormatter.print( date );
   }
 
   private static boolean isNameCharacter( final char ch )
   {
-    return SP != ch && '=' != ch & '"' != ch;
+    return SP != ch && SD_ASSIGN != ch & SD_VALUE_QUOTE != ch;
   }
 }
