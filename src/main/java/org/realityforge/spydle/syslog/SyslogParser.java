@@ -133,11 +133,6 @@ NILVALUE        = "-"
     final String hostnameString = message.substring( startHost, endHost );
     final String hostname = "-".equals( hostnameString ) ? null : hostnameString;
 
-    if( SP != message.charAt( endHost ) )
-    {
-      throw new IllegalArgumentException( "Unknown content trailing Hostname: " + message );
-    }
-
     final int startAppName = endHost + 1;
     final int endAppName = message.indexOf( SP, startAppName );
     if( -1 == endAppName )
