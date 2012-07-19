@@ -103,6 +103,72 @@ public class SyslogMessage
     return _message;
   }
 
+  @Override
+  public boolean equals( final Object o )
+  {
+    if( this == o )
+    {
+      return true;
+    }
+    else if( o == null || getClass() != o.getClass() )
+    {
+      return false;
+    }
+
+    final SyslogMessage that = (SyslogMessage) o;
+    if( _facility != that._facility )
+    {
+      return false;
+    }
+    else if( _level != that._level )
+    {
+      return false;
+    }
+    else if( _appName != null ? !_appName.equals( that._appName ) : that._appName != null )
+    {
+      return false;
+    }
+    else if( _hostname != null ? !_hostname.equals( that._hostname ) : that._hostname != null )
+    {
+      return false;
+    }
+    else if( _message != null ? !_message.equals( that._message ) : that._message != null )
+    {
+      return false;
+    }
+    else if( _msgId != null ? !_msgId.equals( that._msgId ) : that._msgId != null )
+    {
+      return false;
+    }
+    else if( _procId != null ? !_procId.equals( that._procId ) : that._procId != null )
+    {
+      return false;
+    }
+    else if( _structuredData != null ? !_structuredData.equals( that._structuredData ) : that._structuredData != null )
+    {
+      return false;
+    }
+    else
+    {
+      return !( _timestamp != null ? !_timestamp.equals( that._timestamp ) : that._timestamp != null );
+    }
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int result = _facility;
+    result = 31 * result + _level;
+    result = 31 * result + ( _timestamp != null ? _timestamp.hashCode() : 0 );
+    result = 31 * result + ( _hostname != null ? _hostname.hashCode() : 0 );
+    result = 31 * result + ( _appName != null ? _appName.hashCode() : 0 );
+    result = 31 * result + ( _procId != null ? _procId.hashCode() : 0 );
+    result = 31 * result + ( _msgId != null ? _msgId.hashCode() : 0 );
+    result = 31 * result + ( _structuredData != null ? _structuredData.hashCode() : 0 );
+    result = 31 * result + ( _message != null ? _message.hashCode() : 0 );
+    return result;
+  }
+
   public static SyslogMessage parseSyslogMessage( final String rawMessage )
   {
     try
