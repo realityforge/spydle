@@ -1,6 +1,8 @@
 package org.realityforge.spydle.syslog;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import static org.testng.Assert.*;
@@ -27,16 +29,6 @@ public class SyslogParserTest
       };
   }
 
-  @DataProvider( name = "InvalidMessages" )
-  public Object[][] invalidMessages()
-  {
-    return new Object[][]
-      {
-        //Invalid timestamp
-        { "<34>1 2003-08-24T05:14:15.000000003-07:00 mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" },
-      };
-  }
-
   @Test( dataProvider = "ValidMessages" )
   public void parseValidMessages( final String rawMessage )
   {
@@ -47,7 +39,7 @@ public class SyslogParserTest
   public void simpleParse()
   {
     final SyslogMessage message =
-      SyslogParser.parseSyslogMessage( "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 - BOM'su root' failed for lonvick on /dev/pts/8" );
+      SyslogParser.parseSyslogMessage( "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"] BOM'su root' failed for lonvick on /dev/pts/8" );
     assertEquals( message.getFacility(), 4 );
     assertEquals( message.getLevel(), 2 );
     final Date timestamp = message.getTimestamp();
@@ -57,5 +49,17 @@ public class SyslogParserTest
     assertEquals( message.getAppName(), "su" );
     assertNull( message.getProcId() );
     assertEquals( message.getMsgId(), "ID47" );
+    final Map<String, List<StructuredDataParameter>> structuredData = message.getStructuredData();
+    assertNotNull( structuredData );
+    final List<StructuredDataParameter> p1 = structuredData.get( "exampleSDID@32473" );
+    assertNotNull( p1 );
+    assertEquals( p1.size(), 3 );
+    assertEquals( p1.get( 0 ).getName(), "iut" );
+    assertEquals( p1.get( 0 ).getValue(), "3" );
+    assertEquals( p1.get( 1 ).getName(), "eventSource" );
+    assertEquals( p1.get( 1 ).getValue(), "Application" );
+    assertEquals( p1.get( 2 ).getName(), "eventID" );
+    assertEquals( p1.get( 2 ).getValue(), "1011" );
+    assertEquals( message.getMessage(), "BOM'su root' failed for lonvick on /dev/pts/8" );
   }
 }

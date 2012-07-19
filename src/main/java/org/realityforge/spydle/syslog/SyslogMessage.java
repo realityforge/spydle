@@ -1,6 +1,8 @@
 package org.realityforge.spydle.syslog;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 public class SyslogMessage
@@ -17,14 +19,20 @@ public class SyslogMessage
   private final String _procId;
   @Nullable
   private final String _msgId;
+  @Nullable
+  private final Map<String, List<StructuredDataParameter>> _structuredData;
+  @Nullable
+  private final String _message;
 
   public SyslogMessage( final int facility,
                         final int level,
-                        final Date timestamp,
-                        final String hostname,
-                        final String appName,
-                        final String procId,
-                        final String msgId )
+                        @Nullable final Date timestamp,
+                        @Nullable final String hostname,
+                        @Nullable final String appName,
+                        @Nullable final String procId,
+                        @Nullable final String msgId,
+                        @Nullable final Map<String, List<StructuredDataParameter>> structuredData,
+                        @Nullable final String message )
   {
     _facility = facility;
     _level = level;
@@ -33,6 +41,8 @@ public class SyslogMessage
     _appName = appName;
     _procId = procId;
     _msgId = msgId;
+    _structuredData = structuredData;
+    _message = message;
   }
 
   public int getFacility()
@@ -73,5 +83,17 @@ public class SyslogMessage
   public String getMsgId()
   {
     return _msgId;
+  }
+
+  @Nullable
+  public Map<String, List<StructuredDataParameter>> getStructuredData()
+  {
+    return _structuredData;
+  }
+
+  @Nullable
+  public String getMessage()
+  {
+    return _message;
   }
 }
