@@ -1,6 +1,11 @@
 package org.realityforge.spydle.syslog;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +182,117 @@ public class SyslogMessage
     result = 31 * result + ( _structuredData != null ? _structuredData.hashCode() : 0 );
     result = 31 * result + ( _message != null ? _message.hashCode() : 0 );
     return result;
+  }
+
+  public static SyslogMessage parseRFC3164SyslogMessage( final String rawMessage )
+  {
+    String message = rawMessage;
+    int facility = -1;
+    int level = -1;
+    DateTime timestamp = null;
+    String hostname = null;
+    String appName = null;
+    String procId = null;
+
+    int index = 0;
+    try
+    {
+      if( PRI_START == rawMessage.charAt( index ) )
+      {
+
+      }
+      final int endPri = rawMessage.indexOf( PRI_END );
+      if( endPri < 1 || endPri >= 5 )
+      {
+        throw new IllegalArgumentException();
+      }
+
+      final int priority;
+      try
+      {
+        priority = Integer.parseInt( rawMessage.substring( 1, endPri ) );
+      }
+      catch( final NumberFormatException nfe )
+      {
+        // Failed to parse PRI
+        throw new IllegalArgumentException();
+      }
+      facility = priority >> 3;
+      level = priority - ( facility << 3 );
+      index = endPri + 1;
+
+      message = rawMessage.substring( index );
+
+      if( rawMessage.length() >= index + 16 &&
+          rawMessage.charAt( index + 15 ) == ' ' &&
+          rawMessage.charAt( index + 3 ) == ' ' &&
+          rawMessage.charAt( index + 6 ) == ' ' )
+      {
+        //The syslog format does not include a  year so tack it in by assuming current year
+        final String year = Integer.toString( Calendar.getInstance().get( Calendar.YEAR ) );
+        try
+        {
+          final SimpleDateFormat dateFormat = new SimpleDateFormat( "MMM dd HH:mm:ss yyyy" );
+          final String dateString = rawMessage.substring( index, index + 15 ) + " " + year;
+          timestamp = new DateTime( dateFormat.parse( dateString ) );
+          index += 16;
+          message = rawMessage.substring( index );
+        }
+        catch( final ParseException pe )
+        {
+          timestamp = null;
+        }
+      }
+      if( null == timestamp )
+      {
+        throw new IllegalArgumentException();
+      }
+
+      final int endHost = rawMessage.indexOf( SP, index );
+      if( -1 != endHost )
+      {
+        try
+        {
+          hostname = rawMessage.substring( index, endHost );
+          index = endHost + 1;
+          message = rawMessage.substring( endHost + 1 );
+        }
+        catch( final StringIndexOutOfBoundsException oob )
+        {
+          hostname = null;
+        }
+      }
+      if( null == hostname )
+      {
+        throw new IllegalArgumentException();
+      }
+
+      final int tagEnd = rawMessage.indexOf( ':', index );
+      final int nextSp = rawMessage.indexOf( SP, index );
+      if( -1 != nextSp && -1 != tagEnd && tagEnd < nextSp && nextSp == tagEnd + 1 )
+      {
+        final int openProcId = rawMessage.indexOf( '[', index );
+        if( -1 != openProcId && ']' == rawMessage.charAt( tagEnd - 1 ) )
+        {
+          appName = rawMessage.substring( index, openProcId );
+          procId = rawMessage.substring( openProcId + 1, tagEnd - 1 );
+          message = rawMessage.substring( nextSp + 1 );
+        }
+      }
+    }
+    catch( final Exception e )
+    {
+      //Ignored
+    }
+    return new SyslogMessage( facility,
+                              level,
+                              timestamp,
+                              hostname,
+                              appName,
+                              procId,
+                              null,
+                              null,
+                              message );
   }
 
   @Override

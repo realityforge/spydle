@@ -11,6 +11,27 @@ import static org.testng.Assert.*;
 
 public class SyslogMessageTest
 {
+  @DataProvider( name = "validRFC3164Messages" )
+  public Object[][] validRFC3164Messages()
+  {
+    return new Object[][]
+      {
+        { "<34>Oct 11 22:14:15 mymachine su[21]: 'su root' failed for lonvick on /dev/pts/8", true },
+        //No ProcID
+        { "<34>Oct 11 22:14:15 mymachine su: 'su root' failed for lonvick on /dev/pts/8", true },
+        //No tag
+        { "<34>Oct 11 22:14:15 mymachine 'su root' failed for lonvick on /dev/pts/8", true },
+        //No PRI
+        { "Use the BFG!", false },
+        //No host
+        { "<13>Feb  5 17:32:18 10.0.0.99 Use the BFG!", false },
+        //Date in incorrect format so mashed
+        { "<165>Aug 24 05:34:00 CST 1987 mymachine myproc[10]: %% It's time to make the do-nuts.  %%  Ingredients: Mix=OK, Jelly=OK # Devices: Mixer=OK, Jelly_Injector=OK, Frier=OK # Transport: Conveyer1=OK, Conveyer2=OK # %%", false },
+        //Date in incorrect format so mashed
+        { "<0>1990 Oct 22 10:52:01 TZ-6 scapegoat.dmz.example.org 10.1.2.3 sched[0]: That's All Folks!", false },
+      };
+  }
+
   @DataProvider( name = "ValidStructuredMessages" )
   public Object[][] validStructuredMessages()
   {
@@ -72,11 +93,24 @@ public class SyslogMessageTest
     fail( "Unexpectedly parsed " + rawMessage1 + " but expected failure with " + messagePrefix );
   }
 
+  @Test( dataProvider = "validRFC3164Messages" )
+  public void parseValidRFC3164Messages( final String rawMessage1, final boolean expectRawMessageIsBytePerfect )
+  {
+    final SyslogMessage syslogMessage1 = SyslogMessage.parseRFC3164SyslogMessage( rawMessage1 );
+    final String rawMessage2 = syslogMessage1.asStructuredSyslogMessage();
+    if( expectRawMessageIsBytePerfect )
+    {
+      //assertEquals( rawMessage1, rawMessage2 );
+    }
+    //final SyslogMessage syslogMessage2 = SyslogMessage.parseRFC3164SyslogMessage( rawMessage2 );
+    //assertEquals( syslogMessage1, syslogMessage2 );
+  }
+
   @Test( dataProvider = "ValidStructuredMessages" )
   public void parseValidStructuredSyslogMessages( final String rawMessage1, final boolean expectRawMessageIsBytePerfect )
   {
     final SyslogMessage syslogMessage1 = SyslogMessage.parseStructuredSyslogMessage( rawMessage1 );
-    final String rawMessage2 = syslogMessage1.toString();
+    final String rawMessage2 = syslogMessage1.asStructuredSyslogMessage();
     if( expectRawMessageIsBytePerfect )
     {
       assertEquals( rawMessage1, rawMessage2 );
@@ -86,7 +120,7 @@ public class SyslogMessageTest
   }
 
   @Test
-  public void simpleParse()
+  public void parseStructuredSyslogMessage()
   {
     final SyslogMessage message =
       SyslogMessage.parseStructuredSyslogMessage( "<34>1 2003-10-11T22:14:15.003Z mymachine.example.com su - ID47 [exampleSDID@32473 iut=\"3\" eventSource=\"Application\" eventID=\"1011\"][examplePriority@32473 class=\"high\"] BOM'su root' failed for lonvick on /dev/pts/8" );
@@ -118,6 +152,101 @@ public class SyslogMessageTest
     assertEquals( message.getMessage(), "BOM'su root' failed for lonvick on /dev/pts/8" );
   }
 
+  @Test
+  public void parseRFC3164SyslogMessage()
+  {
+    final SyslogMessage message =
+      SyslogMessage.parseRFC3164SyslogMessage( "<34>Oct 11 22:14:15 mymachine su[21]: 'su root' failed for lonvick on /dev/pts/8" );
+    assertEquals( message.getFacility(), 4 );
+    assertEquals( message.getLevel(), 2 );
+    final DateTime timestamp = message.getTimestamp();
+    assertNotNull( timestamp );
+    assertEquals( timestamp.getSecondOfMinute(), 15 );
+    assertEquals( timestamp.getMinuteOfHour(), 14 );
+    assertEquals( timestamp.getHourOfDay(), 22 );
+    assertEquals( timestamp.getDayOfMonth(), 11 );
+    assertEquals( timestamp.getMonthOfYear(), 10 );
+    assertEquals( message.getHostname(), "mymachine" );
+    assertEquals( message.getAppName(), "su" );
+    assertEquals( message.getProcId(), "21" );
+    assertNull( message.getStructuredData() );
+    assertEquals( message.getMessage(), "'su root' failed for lonvick on /dev/pts/8" );
+  }
+
+  @Test
+  public void parseRFC3164SyslogMessageWithoutTag()
+  {
+    final SyslogMessage message =
+      SyslogMessage.parseRFC3164SyslogMessage( "<34>Oct 11 22:14:15 mymachine 'su root' failed for lonvick on /dev/pts/8" );
+    assertEquals( message.getFacility(), 4 );
+    assertEquals( message.getLevel(), 2 );
+    final DateTime timestamp = message.getTimestamp();
+    assertNotNull( timestamp );
+    assertEquals( timestamp.getSecondOfMinute(), 15 );
+    assertEquals( timestamp.getMinuteOfHour(), 14 );
+    assertEquals( timestamp.getHourOfDay(), 22 );
+    assertEquals( timestamp.getDayOfMonth(), 11 );
+    assertEquals( timestamp.getMonthOfYear(), 10 );
+    assertEquals( message.getHostname(), "mymachine" );
+    assertNull( message.getAppName() );
+    assertNull( message.getProcId() );
+    assertNull( message.getStructuredData() );
+    assertEquals( message.getMessage(), "'su root' failed for lonvick on /dev/pts/8" );
+  }
+
+  @Test
+  public void parseRFC3164SyslogMessageWithoutHost()
+  {
+    final SyslogMessage message =
+      SyslogMessage.parseRFC3164SyslogMessage( "<34>Oct 11 22:14:15 Bing!" );
+    assertEquals( message.getFacility(), 4 );
+    assertEquals( message.getLevel(), 2 );
+    final DateTime timestamp = message.getTimestamp();
+    assertNotNull( timestamp );
+    assertEquals( timestamp.getSecondOfMinute(), 15 );
+    assertEquals( timestamp.getMinuteOfHour(), 14 );
+    assertEquals( timestamp.getHourOfDay(), 22 );
+    assertEquals( timestamp.getDayOfMonth(), 11 );
+    assertEquals( timestamp.getMonthOfYear(), 10 );
+    assertNull( message.getHostname() );
+    assertNull( message.getHostname() );
+    assertNull( message.getAppName() );
+    assertNull( message.getProcId() );
+    assertNull( message.getStructuredData() );
+    assertEquals( message.getMessage(), "Bing!" );
+  }
+
+  @Test
+  public void parseRFC3164SyslogMessageWithoutDate()
+  {
+    final SyslogMessage message =
+      SyslogMessage.parseRFC3164SyslogMessage( "<34>Bing!" );
+    assertEquals( message.getFacility(), 4 );
+    assertEquals( message.getLevel(), 2 );
+    assertNull( message.getTimestamp() );
+    assertNull( message.getHostname() );
+    assertNull( message.getHostname() );
+    assertNull( message.getAppName() );
+    assertNull( message.getProcId() );
+    assertNull( message.getStructuredData() );
+    assertEquals( message.getMessage(), "Bing!" );
+  }
+
+  @Test
+  public void parseRFC3164SyslogMessageWithoutPRI()
+  {
+    final SyslogMessage message =
+      SyslogMessage.parseRFC3164SyslogMessage( "Bing!" );
+    assertEquals( message.getFacility(), -1 );
+    assertEquals( message.getLevel(), -1 );
+    assertNull( message.getTimestamp() );
+    assertNull( message.getHostname() );
+    assertNull( message.getHostname() );
+    assertNull( message.getAppName() );
+    assertNull( message.getProcId() );
+    assertNull( message.getStructuredData() );
+    assertEquals( message.getMessage(), "Bing!" );
+  }
 
   @Test
   public void equals()
@@ -142,8 +271,8 @@ public class SyslogMessageTest
     assertEquals( message, message2 );
     assertEquals( message.hashCode(), message2.hashCode() );
 
-        final HashMap<String, List<StructuredDataParameter>> structuredData3 = new HashMap<>(  );
-    final ArrayList<StructuredDataParameter> params3 = new ArrayList<>(params);
+    final HashMap<String, List<StructuredDataParameter>> structuredData3 = new HashMap<>();
+    final ArrayList<StructuredDataParameter> params3 = new ArrayList<>( params );
     structuredData3.put( "key", params3 );
     final SyslogMessage message3 = new SyslogMessage( facility, level, time, hostname, appName, procId, msgId, structuredData3, text );
     assertEquals( message, message3 );
