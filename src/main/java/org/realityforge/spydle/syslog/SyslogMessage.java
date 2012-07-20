@@ -182,6 +182,11 @@ public class SyslogMessage
   @Override
   public String toString()
   {
+    return asStructuredSyslogMessage();
+  }
+
+  public String asStructuredSyslogMessage()
+  {
     final DateTime ts = getTimestamp();
     final String timestamp = ts == null ? NILVALUE_STRING : emitTimestamp( ts );
     final String hostname = getHostname() == null ? NILVALUE_STRING : getHostname();
