@@ -227,7 +227,7 @@ public class SyslogMessage
            messageSuffix;
   }
 
-  public static SyslogMessage parseSyslogMessage( final String rawMessage )
+  public static SyslogMessage parseStructuredSyslogMessage( final String rawMessage )
   {
     try
     {
@@ -276,18 +276,18 @@ public class SyslogMessage
       else
       {
         endTimestamp = rawMessage.indexOf( SP, startTimestamp );
+        if( -1 == endTimestamp )
+        {
+          throw new IllegalArgumentException( "Message truncated after timestamp: " + rawMessage );
+        }
         timestamp = parseDateTime( rawMessage.substring( startTimestamp, endTimestamp ) );
-      }
-      if( SP != rawMessage.charAt( endTimestamp ) )
-      {
-        throw new IllegalArgumentException( "Unknown content trailing timestamp: " + rawMessage );
       }
 
       final int startHost = endTimestamp + 1;
       final int endHost = rawMessage.indexOf( SP, startHost );
       if( -1 == endHost )
       {
-        throw new IllegalArgumentException( "Message truncated after host: " + rawMessage );
+        throw new IllegalArgumentException( "Message truncated after hostname: " + rawMessage );
       }
       final String hostnameString = rawMessage.substring( startHost, endHost );
       final String hostname = NILVALUE_STRING.equals( hostnameString ) ? null : hostnameString;
@@ -389,10 +389,6 @@ public class SyslogMessage
             sb.setLength( 0 );
             params.add( new StructuredDataParameter( key, value ) );
             ch = rawMessage.charAt( index );
-          }
-          if( SD_END != rawMessage.charAt( index ) )
-          {
-            throw new IllegalArgumentException( "Missing ] at end of structured data: " + rawMessage );
           }
           index++;
           if( index == rawMessage.length() )
