@@ -16,19 +16,19 @@ public class SyslogMessageTest
   {
     return new Object[][]
       {
-        { "<34>Oct 11 22:14:15 mymachine su[21]: 'su root' failed for lonvick on /dev/pts/8", true },
+        { "<34>Oct 11 22:14:15 mymachine su[21]: 'su root' failed for lonvick on /dev/pts/8" },
         //No ProcID
-        { "<34>Oct 11 22:14:15 mymachine su: 'su root' failed for lonvick on /dev/pts/8", true },
+        { "<34>Oct 11 22:14:15 mymachine su: 'su root' failed for lonvick on /dev/pts/8" },
         //No tag
-        { "<34>Oct 11 22:14:15 mymachine 'su root' failed for lonvick on /dev/pts/8", true },
+        { "<34>Oct 11 22:14:15 mymachine 'su root' failed for lonvick on /dev/pts/8" },
         //No PRI
-        { "Use the BFG!", false },
+        { "Use the BFG!" },
         //No host
-        { "<13>Feb  5 17:32:18 10.0.0.99 Use the BFG!", false },
+        { "<13>Feb  5 17:32:18 10.0.0.99 Use the BFG!" },
         //Date in incorrect format so mashed
-        { "<165>Aug 24 05:34:00 CST 1987 mymachine myproc[10]: %% It's time to make the do-nuts.  %%  Ingredients: Mix=OK, Jelly=OK # Devices: Mixer=OK, Jelly_Injector=OK, Frier=OK # Transport: Conveyer1=OK, Conveyer2=OK # %%", false },
+        { "<165>Aug 24 05:34:00 CST 1987 mymachine myproc[10]: %% It's time to make the do-nuts.  %%  Ingredients: Mix=OK, Jelly=OK # Devices: Mixer=OK, Jelly_Injector=OK, Frier=OK # Transport: Conveyer1=OK, Conveyer2=OK # %%" },
         //Date in incorrect format so mashed
-        { "<0>1990 Oct 22 10:52:01 TZ-6 scapegoat.dmz.example.org 10.1.2.3 sched[0]: That's All Folks!", false },
+        { "<0>1990 Oct 22 10:52:01 TZ-6 scapegoat.dmz.example.org 10.1.2.3 sched[0]: That's All Folks!" },
       };
   }
 
@@ -94,16 +94,9 @@ public class SyslogMessageTest
   }
 
   @Test( dataProvider = "validRFC3164Messages" )
-  public void parseValidRFC3164Messages( final String rawMessage1, final boolean expectRawMessageIsBytePerfect )
+  public void parseValidRFC3164Messages( final String rawMessage1 )
   {
-    final SyslogMessage syslogMessage1 = SyslogMessage.parseRFC3164SyslogMessage( rawMessage1 );
-    final String rawMessage2 = syslogMessage1.asStructuredSyslogMessage();
-    if( expectRawMessageIsBytePerfect )
-    {
-      //assertEquals( rawMessage1, rawMessage2 );
-    }
-    //final SyslogMessage syslogMessage2 = SyslogMessage.parseRFC3164SyslogMessage( rawMessage2 );
-    //assertEquals( syslogMessage1, syslogMessage2 );
+    SyslogMessage.parseRFC3164SyslogMessage( rawMessage1 );
   }
 
   @Test( dataProvider = "ValidStructuredMessages" )
