@@ -5,7 +5,6 @@ import java.util.List;
 import javax.management.MalformedObjectNameException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.realityforge.spydle.Namespace;
 import org.realityforge.spydle.util.ConfigUtil;
 
 /**
@@ -50,7 +49,7 @@ public final class JdbcKit
   {
     final String query = ConfigUtil.getValue( config, "query", String.class );
     final String keyColumn = ConfigUtil.getValue( config, "key_column", String.class, false );
-    final Namespace namespace = ConfigUtil.parseNamespace( config );
+    final String namespace = ConfigUtil.parseNamespace( config );
     return new JdbcProbeDescriptor( query, keyColumn, namespace );
   }
 }

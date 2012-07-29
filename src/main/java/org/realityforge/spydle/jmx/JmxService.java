@@ -16,7 +16,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import org.realityforge.spydle.MetricName;
 import org.realityforge.spydle.MetricSource;
 import org.realityforge.spydle.MetricValue;
 import org.realityforge.spydle.MetricValueSet;
@@ -144,8 +143,8 @@ public final class JmxService
         final Object value = mBeanServer.getAttribute( objectName, attributeName );
         if( value instanceof Number )
         {
-          final MetricName name = probe.generateKey( objectName, attributeName );
-          final MetricValue metricValue = new MetricValue( name, (Number) value );
+          final MetricValue metricValue =
+            new MetricValue( probe.generateKey( objectName, attributeName ), (Number) value );
           metrics.add( metricValue );
         }
       }

@@ -1,3 +1,8 @@
+## v1.2:
+
+* Stop modelling the name of metrics in a LDAP-esque fashion and instead used a simple dotted string. The change was
+  made to make it more compatible with existing data stores such as Graphite and OpenTSDB.
+
 ## v1.1.1:
 
 * Remove duplicate attribute names in graphite service.

@@ -1,15 +1,8 @@
 package org.realityforge.spydle.util;
 
-import java.util.LinkedHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 import org.json.simple.JSONObject;
-import org.realityforge.spydle.Namespace;
 
 /**
  * Utility class for processing json configuration files.
@@ -20,6 +13,31 @@ public final class ConfigUtil
   {
   }
 
+  public static void appendNameElement( final StringBuilder sb, final String element )
+  {
+    if( null != element )
+    {
+      if( 0 != sb.length() )
+      {
+        sb.append( '.' );
+      }
+      final int length = element.length();
+      for( int i = 0; i < length; i++ )
+      {
+        final char c = element.charAt( i );
+        if( '_' == c || Character.isLetterOrDigit( c ) )
+        {
+          sb.append( c );
+        }
+        else
+        {
+          sb.append( '_' );
+        }
+      }
+    }
+  }
+
+
   /**
    * Parse the "namespace" field from the specified configuration.
    * If no namespace defined, return an empty namespace.
@@ -28,38 +46,9 @@ public final class ConfigUtil
    * @return the namespace.
    */
   @Nullable
-  public static Namespace parseNamespace( final JSONObject config )
+  public static String parseNamespace( final JSONObject config )
   {
-    final String namespace = getValue( config, "namespace", String.class, false );
-    if( null != namespace )
-    {
-      try
-      {
-        final LdapName name = new LdapName( namespace );
-        final LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        for( final Rdn rdn : name.getRdns() )
-        {
-          final Attributes attributes = rdn.toAttributes();
-
-          if( attributes.size() != 1 )
-          {
-            throw new IllegalArgumentException( "Invalid namespace component: " + rdn );
-          }
-          final String key = attributes.getIDs().next();
-          final Attribute attribute = attributes.get( key );
-          map.put( key, attribute.get().toString() );
-        }
-        return new Namespace( map );
-      }
-      catch( final NamingException ne )
-      {
-        throw new IllegalArgumentException( "Invalid namespace: " + namespace, ne );
-      }
-    }
-    else
-    {
-      return null;
-    }
+    return getValue( config, "namespace", String.class, false );
   }
 
   /**

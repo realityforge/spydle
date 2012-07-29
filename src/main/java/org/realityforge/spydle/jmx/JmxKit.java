@@ -7,7 +7,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.realityforge.spydle.Namespace;
 import org.realityforge.spydle.util.ConfigUtil;
 
 /**
@@ -65,7 +64,7 @@ public final class JmxKit
     {
       attributeNames = null;
     }
-    final Namespace namespace = ConfigUtil.parseNamespace( config );
+    final String namespace = ConfigUtil.parseNamespace( config );
     final JSONArray nameComponentsArray = ConfigUtil.getValue( config, "name_components", JSONArray.class, false );
     final ArrayList<String> nameComponents;
     if( null != nameComponentsArray )

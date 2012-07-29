@@ -1,10 +1,8 @@
 package org.realityforge.spydle.jdbc;
 
-import java.util.LinkedHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.realityforge.spydle.MetricName;
-import org.realityforge.spydle.Namespace;
+import org.realityforge.spydle.util.ConfigUtil;
 
 /**
  * A description of a query to run against a JDBC service.
@@ -13,11 +11,11 @@ public class JdbcProbeDescriptor
 {
   private final String _query;
   private final String _keyColumn;
-  private final Namespace _namespace;
+  private final String _namespace;
 
   public JdbcProbeDescriptor( @Nonnull final String query,
                               @Nullable final String keyColumn,
-                              @Nullable final Namespace namespace )
+                              @Nullable final String namespace )
   {
     _query = query;
     _keyColumn = keyColumn;
@@ -37,23 +35,17 @@ public class JdbcProbeDescriptor
   }
 
   @Nullable
-  public Namespace getNamespace()
+  public String getNamespace()
   {
     return _namespace;
   }
 
-  public MetricName generateKey( final String keyValue, final String columnName )
+  public String generateKey( final String keyValue, final String columnName )
   {
-    final LinkedHashMap<String, String> map = new LinkedHashMap<>();
-    final Namespace namePrefix = getNamespace();
-    if( null != namePrefix )
-    {
-      map.putAll( namePrefix.getNameComponents() );
-    }
-    if( null != keyValue )
-    {
-      map.put( _keyColumn, keyValue );
-    }
-    return new MetricName( new Namespace( map ), columnName );
+    final StringBuilder sb = new StringBuilder();
+    ConfigUtil.appendNameElement( sb, getNamespace() );
+    ConfigUtil.appendNameElement( sb, keyValue );
+    ConfigUtil.appendNameElement( sb, columnName );
+    return sb.toString();
   }
 }

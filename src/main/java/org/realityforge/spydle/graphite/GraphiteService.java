@@ -8,11 +8,9 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
-import org.realityforge.spydle.MetricName;
 import org.realityforge.spydle.MetricSink;
 import org.realityforge.spydle.MetricValue;
 import org.realityforge.spydle.MetricValueSet;
-import org.realityforge.spydle.Namespace;
 
 public final class GraphiteService
   implements Closeable, MetricSink
@@ -40,18 +38,7 @@ public final class GraphiteService
       {
         sb.append( prefix );
       }
-      final MetricName name = metric.getName();
-      final Namespace namespace = name.getNamespace();
-      for( final String value : namespace.getNameComponents().values() )
-      {
-        if( sb.length() > 0 )
-        {
-          sb.append( '.' );
-        }
-        addGraphiteKey( sb, value.replace( '.','_' ) );
-      }
-      sb.append( '.' );
-      addGraphiteKey( sb, name.getKey() );
+      sb.append( metric.getName() );
       sb.append( ' ' );
       sb.append( metric.getValue() );
       sb.append( ' ' );
@@ -77,18 +64,6 @@ public final class GraphiteService
       LOG.log( Level.FINE, "Error writing to graphite server: " + _descriptor, ioe );
       close();
       return false;
-    }
-  }
-
-  private void addGraphiteKey( final StringBuilder sb, final String key )
-  {
-    for ( int i = 0; i < key.length(); i++ )
-    {
-      final char c = key.charAt( i );
-      if ( '_' == c || Character.isLetterOrDigit( c ) )
-      {
-        sb.append( c );
-      }
     }
   }
 
