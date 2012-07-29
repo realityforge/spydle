@@ -1,4 +1,5 @@
-= Spydle
+Spydle
+======
 
 Spydle collects metrics from your services and feeds it to your metric collection system. Spydle can actively
 seek query the monitored systems or passively recive data pushed to it.
@@ -6,7 +7,8 @@ seek query the monitored systems or passively recive data pushed to it.
 Right now Spydle is focused on collecting metrics from JVM based services and pushing the data to Graphite but
 expect this to change over time.
 
-= TODO
+TODO
+====
 
 Introduce https://github.com/etsy/logster/blob/master/logster as a source of data.
 
