@@ -1,6 +1,8 @@
 Spydle
 ======
 
+[![Build Status](https://secure.travis-ci.org/realityforge/spydle.png?branch=master)](http://travis-ci.org/realityforge/spydle)
+
 Spydle collects metrics from your services and feeds it to your metric collection system. Spydle can actively
 seek query the monitored systems or passively recive data pushed to it.
 
