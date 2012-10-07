@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ruby_string="jruby-1.6.7" 
+ruby_string="ruby-1.9.3-p0"
 project_name="spydle"
 bundler_gem_home="vendor/bundle" 
 cat <<EOF
