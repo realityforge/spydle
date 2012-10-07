@@ -9,3 +9,4 @@
 /bin
 /.bundle
 /setup.*
+/Gemfile.lock
