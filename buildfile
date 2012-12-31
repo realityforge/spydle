@@ -1,9 +1,10 @@
+require 'buildr/git_auto_version'
+
 download(artifact(:getopt4j) => 'http://cloud.github.com/downloads/realityforge/getopt4j/getopt4j-1.0.jar')
 download(artifact(:getopt4j_sources) => 'http://cloud.github.com/downloads/realityforge/getopt4j/getopt4j-1.0-sources.jar')
 
 desc "Spydle: Lightweight Monitoring Software"
 define('spydle') do
-  project.version = `git describe --tags --always`.strip
   project.group = 'org.realityforge'
   compile.options.source = '1.7'
   compile.options.target = '1.7'
