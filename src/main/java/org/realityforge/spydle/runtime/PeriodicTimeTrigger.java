@@ -28,6 +28,3 @@ final class PeriodicTimeTrigger
     }
   }
 }
-
-
-

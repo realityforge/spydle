@@ -68,4 +68,3 @@ final class TimeEntry
     return "TimeEntry[ name=" + _name + " time=" + _nextTime + " ]";
   }
 }
-

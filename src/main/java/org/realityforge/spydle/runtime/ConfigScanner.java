@@ -176,4 +176,3 @@ final class ConfigScanner
     }
   }
 }
-

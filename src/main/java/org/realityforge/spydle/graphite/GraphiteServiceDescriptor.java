@@ -16,7 +16,7 @@ public final class GraphiteServiceDescriptor
   @Nullable
   private final String _prefix;
 
-  public GraphiteServiceDescriptor( @Nonnull final String host, 
+  public GraphiteServiceDescriptor( @Nonnull final String host,
                                     final int port,
                                     @Nullable final String prefix )
   {
