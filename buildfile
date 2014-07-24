@@ -7,7 +7,7 @@ define 'spydle' do
   compile.options.target = '1.7'
   compile.options.lint = 'all'
 
-  compile.with :javax_annotation,
+  compile.with :javax_jsr305,
                :joda_time,
                :getopt4j,
                :json_simple
