@@ -11,4 +11,4 @@ artifacts:
 
   #
   # Mocking library
-  mockito: org.mockito:mockito-all:jar:1.8.5
+  mockito: org.mockito:mockito-all:jar:1.9.5
