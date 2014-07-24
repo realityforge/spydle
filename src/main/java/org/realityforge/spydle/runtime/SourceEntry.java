@@ -12,7 +12,6 @@ final class SourceEntry
   private final MonitorDataStore _dataStore;
   @Nonnull
   private final MetricSource _source;
-  @Nonnull
   private final int _period;
   private long _lastPollTime;
   private long _lastFailTime;
