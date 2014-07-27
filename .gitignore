@@ -5,5 +5,4 @@
 /reports
 /conf.d
 /_buildr.rb
-/setup.*
 /Gemfile.lock
