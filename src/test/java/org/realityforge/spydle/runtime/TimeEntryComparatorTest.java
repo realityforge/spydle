@@ -2,6 +2,7 @@ package org.realityforge.spydle.runtime;
 
 import java.util.Arrays;
 import org.testng.annotations.Test;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
@@ -13,8 +14,8 @@ public final class TimeEntryComparatorTest
   public void sorting()
   {
     final long now = System.currentTimeMillis();
-    final TimeEntry entry1 = new TimeEntry( "NameA","StageA",new TestTimeTrigger(), new TestTarget() );
-    final TimeEntry entry2 = new TimeEntry( "NameB","StageB",new TestTimeTrigger(), new TestTarget() );
+    final TimeEntry entry1 = new TimeEntry( "NameA", "StageA", new TestTimeTrigger(), mock( Runnable.class ) );
+    final TimeEntry entry2 = new TimeEntry( "NameB", "StageB", new TestTimeTrigger(), mock( Runnable.class ) );
 
     final TimeEntry[] elements = new TimeEntry[]{ entry1, entry2, null, null };
 
