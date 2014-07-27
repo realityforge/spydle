@@ -6,7 +6,5 @@
 /conf.d
 /docs
 /_buildr.rb
-/bin
-/.bundle
 /setup.*
 /Gemfile.lock
