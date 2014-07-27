@@ -20,4 +20,10 @@ define 'spydle' do
 
   test.using :testng
   test.compile.with :mockito
+
+  ipr.add_java_configuration(project,
+                             'org.realityforge.spydle.Main',
+                             :name => 'Spydle',
+                             :dir => 'file://$PROJECT_DIR$/',
+                             :args => '-d conf.d')
 end
