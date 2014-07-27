@@ -5,7 +5,7 @@ repositories:
 artifacts:
   javax_jsr305: com.google.code.findbugs:jsr305:jar:2.0.1
   getopt4j: org.realityforge.getopt4j:getopt4j:jar:1.1
-  json_simple: com.googlecode.json-simple:json-simple:jar:1.1
+  javax_json: org.glassfish:javax.json:jar:1.0.3
   joda_time: joda-time:joda-time:jar:1.6
 
   #

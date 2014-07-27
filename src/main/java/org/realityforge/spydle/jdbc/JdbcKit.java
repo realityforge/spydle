@@ -2,10 +2,9 @@ package org.realityforge.spydle.jdbc;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.management.MalformedObjectNameException;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.realityforge.spydle.util.ConfigUtil;
 
 /**
  * Utility class to interact with the JdbcSource.
@@ -16,40 +15,44 @@ public final class JdbcKit
   {
   }
 
-  public static JdbcService build( final JSONObject config )
+  public static JdbcService build( final JsonObject config )
     throws Exception
   {
     return new JdbcService( parse( config ) );
   }
 
-  private static JdbcTaskDescriptor parse( final JSONObject config )
+  private static JdbcTaskDescriptor parse( final JsonObject config )
     throws Exception
   {
-    final String driver = ConfigUtil.getValue( config, "driver", String.class );
-    final String jdbcUrl = ConfigUtil.getValue( config, "url", String.class );
+    final String driver = config.getString( "driver" );
+    final String jdbcUrl = config.getString( "url" );
 
-    final String username = ConfigUtil.getValue( config, "username", String.class, false );
-    final String password = ConfigUtil.getValue( config, "password", String.class, false );
+    final String username = config.getString( "username", null );
+    final String password = config.getString( "password", null );
 
-    final JdbcConnectionDescriptor connectionDescriptor = new JdbcConnectionDescriptor( driver, jdbcUrl, username, password );
+    final JdbcConnectionDescriptor connectionDescriptor =
+      new JdbcConnectionDescriptor( driver, jdbcUrl, username, password );
 
     final List<JdbcProbeDescriptor> probes = new ArrayList<>();
 
-    final JSONArray queryArray = ConfigUtil.getValue( config, "probes", JSONArray.class );
-    for( final Object queryConfig : queryArray )
+    final JsonArray queryArray = config.containsKey( "probes" ) ? config.getJsonArray( "probes" ) : null;
+    if ( null != queryArray )
     {
-      probes.add( parseQuery( (JSONObject) queryConfig ) );
+      for ( final Object queryConfig : queryArray )
+      {
+        probes.add( parseQuery( (JsonObject) queryConfig ) );
+      }
     }
 
     return new JdbcTaskDescriptor( connectionDescriptor, probes );
   }
 
-  private static JdbcProbeDescriptor parseQuery( final JSONObject config )
+  private static JdbcProbeDescriptor parseQuery( final JsonObject config )
     throws MalformedObjectNameException
   {
-    final String query = ConfigUtil.getValue( config, "query", String.class );
-    final String keyColumn = ConfigUtil.getValue( config, "key_column", String.class, false );
-    final String namespace = ConfigUtil.parseNamespace( config );
+    final String query = config.getString( "query" );
+    final String keyColumn = config.getString( "key_column", null );
+    final String namespace = config.getString( "namespace", null );
     return new JdbcProbeDescriptor( query, keyColumn, namespace );
   }
 }

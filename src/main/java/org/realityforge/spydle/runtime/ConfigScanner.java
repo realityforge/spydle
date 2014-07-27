@@ -13,13 +13,12 @@ import java.nio.file.WatchService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nonnull;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import javax.json.Json;
+import javax.json.JsonObject;
 import org.realityforge.spydle.graphite.GraphiteKit;
 import org.realityforge.spydle.jdbc.JdbcKit;
 import org.realityforge.spydle.jmx.JmxKit;
 import org.realityforge.spydle.print.PrintKit;
-import org.realityforge.spydle.util.ConfigUtil;
 
 /**
  * Utility class that monitors a configuration directory and updates data store when configuration changes.
@@ -51,7 +50,7 @@ final class ConfigScanner
     {
       _watcher.close();
     }
-    catch( final Throwable t )
+    catch ( final Throwable t )
     {
       LOG.log( Level.WARNING, "Error closing watcher", t );
     }
@@ -70,9 +69,9 @@ final class ConfigScanner
                 StandardWatchEventKinds.ENTRY_MODIFY );
 
     final File[] files = _configDirectory.listFiles();
-    if( null != files )
+    if ( null != files )
     {
-      for( final File file : files )
+      for ( final File file : files )
       {
         loadConfiguration( file );
       }
@@ -82,31 +81,31 @@ final class ConfigScanner
   void scan()
   {
     final WatchKey key = _watcher.poll();
-    if( null != key )
+    if ( null != key )
     {
-      for( final WatchEvent<?> event : key.pollEvents() )
+      for ( final WatchEvent<?> event : key.pollEvents() )
       {
         final WatchEvent.Kind<?> kind = event.kind();
-        if( StandardWatchEventKinds.OVERFLOW != kind )
+        if ( StandardWatchEventKinds.OVERFLOW != kind )
         {
-          @SuppressWarnings( "unchecked" )
+          @SuppressWarnings("unchecked")
           final WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
           final Path context = pathEvent.context();
           final File file =
             _configDirectory.toPath().resolve( context ).toFile().toPath().toFile();
-          if( file.getName().endsWith( ".json" ) )
+          if ( file.getName().endsWith( ".json" ) )
           {
-            if( StandardWatchEventKinds.ENTRY_CREATE == kind )
+            if ( StandardWatchEventKinds.ENTRY_CREATE == kind )
             {
               LOG.info( "Configuration file added: " + file );
               loadConfiguration( file );
             }
-            else if( StandardWatchEventKinds.ENTRY_DELETE == kind )
+            else if ( StandardWatchEventKinds.ENTRY_DELETE == kind )
             {
               LOG.info( "Configuration file removed: " + file );
               unloadConfiguration( file );
             }
-            else if( StandardWatchEventKinds.ENTRY_MODIFY == kind )
+            else if ( StandardWatchEventKinds.ENTRY_MODIFY == kind )
             {
               LOG.info( "Configuration file modified: " + file );
               unloadConfiguration( file );
@@ -122,11 +121,11 @@ final class ConfigScanner
   private void unloadConfiguration( @Nonnull final File file )
   {
     final String key = file.toString();
-    if( _dataStore.isSourceRegistered( key ) )
+    if ( _dataStore.isSourceRegistered( key ) )
     {
       _dataStore.deregisterSource( key );
     }
-    else if( _dataStore.isSinkRegistered( key ) )
+    else if ( _dataStore.isSinkRegistered( key ) )
     {
       _dataStore.deregisterSink( key );
     }
@@ -136,23 +135,16 @@ final class ConfigScanner
   {
     try
     {
-      final JSONObject config = (JSONObject) JSONValue.parse( new FileReader( file ) );
-      final String type = ConfigUtil.getValue( config, "type", String.class );
+      final JsonObject config = Json.createReader( new FileReader( file ) ).readObject();
+      final String type = config.getString( "type" );
 
       // Period really only makes sense for sources
-      final Integer refreshPeriod = ConfigUtil.getValue( config, "period", Integer.class, false );
-      final int pollPeriod = refreshPeriod != null ? refreshPeriod : DEFAULT_PERIOD;
-      String stage = ConfigUtil.getValue( config, "stage", String.class, false );
-      if( null == stage  )
-      {
-        stage = type;
-      }
-      JSONObject subConfig = ConfigUtil.getValue( config, "config", JSONObject.class, false );
-      if ( null == subConfig )
-      {
-        subConfig = new JSONObject();
-      }
-      switch( type )
+      final int refreshPeriod = config.getInt( "period", -1 );
+      final int pollPeriod = -1 == refreshPeriod ? refreshPeriod : DEFAULT_PERIOD;
+      final String stage = config.getString( "stage", type );
+      final JsonObject subConfig =
+        config.containsKey( "config" ) ? config.getJsonObject( "config" ) : Json.createObjectBuilder().build();
+      switch ( type )
       {
         case "in:jmx":
           _dataStore.registerSource( file.toString(), JmxKit.build( subConfig ), stage, pollPeriod );
@@ -170,7 +162,7 @@ final class ConfigScanner
           throw new IllegalArgumentException( "Unknown type '" + type + "' in configuration: " + config );
       }
     }
-    catch( final Throwable t )
+    catch ( final Throwable t )
     {
       LOG.log( Level.WARNING, "Error parsing configuration file: " + file, t );
     }

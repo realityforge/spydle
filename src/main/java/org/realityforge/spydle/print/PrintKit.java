@@ -1,8 +1,7 @@
 package org.realityforge.spydle.print;
 
 import java.io.PrintStream;
-import org.json.simple.JSONObject;
-import org.realityforge.spydle.util.ConfigUtil;
+import javax.json.JsonObject;
 
 /**
  * Utility class to interact with the GraphiteSink.
@@ -13,10 +12,10 @@ public final class PrintKit
   {
   }
 
-  public static PrintStreamMetricSink build( final JSONObject config )
+  public static PrintStreamMetricSink build( final JsonObject config )
     throws Exception
   {
-    final String stream = ConfigUtil.getValue( config, "stream", String.class, false );
+    final String stream = config.getString( "stream", null );
     final PrintStream printStream = "error".equals( stream ) ? System.err : System.out;
     return new PrintStreamMetricSink( printStream );
   }

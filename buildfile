@@ -10,11 +10,11 @@ define 'spydle' do
   compile.with :javax_jsr305,
                :joda_time,
                :getopt4j,
-               :json_simple
+               :javax_json
 
   package(:jar)
   package(:jar, :classifier => 'all').tap do |pkg|
-    pkg.merge(artifacts([:getopt4j,:json_simple]))
+    pkg.merge(artifacts([:getopt4j,:javax_json]))
     pkg.with :manifest => manifest.merge( 'Main-Class' => 'org.realityforge.spydle.Main' )
   end
 
