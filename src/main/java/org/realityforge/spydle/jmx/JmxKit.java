@@ -3,7 +3,6 @@ package org.realityforge.spydle.jmx;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -38,8 +37,7 @@ public final class JmxKit
 
     if ( config.containsKey( "probes" ) )
     {
-      final JsonArray queryArray = config.getJsonArray( "probes" );
-      for ( final Object queryConfig : queryArray )
+      for ( final Object queryConfig : config.getJsonArray( "probes" ) )
       {
         probes.add( parseQuery( (JsonObject) queryConfig ) );
       }
@@ -55,9 +53,8 @@ public final class JmxKit
     final HashSet<String> attributeNames;
     if ( config.containsKey( "attribute_names" ) )
     {
-      final JsonArray queryArray = config.getJsonArray( "attribute_names" );
       attributeNames = new HashSet<>();
-      for ( final Object attributeName : queryArray )
+      for ( final Object attributeName : config.getJsonArray( "attribute_names" ) )
       {
         attributeNames.add( attributeName.toString() );
       }
@@ -70,9 +67,8 @@ public final class JmxKit
     final ArrayList<String> nameComponents;
     if ( config.containsKey( "name_components" ) )
     {
-      final JsonArray nameComponentsArray = config.getJsonArray( "name_components" );
       nameComponents = new ArrayList<>();
-      for ( final Object nameComponent : nameComponentsArray )
+      for ( final Object nameComponent : config.getJsonArray( "name_components" ) )
       {
         nameComponents.add( nameComponent.toString() );
       }

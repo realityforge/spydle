@@ -2,7 +2,6 @@ package org.realityforge.spydle.jdbc;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.management.MalformedObjectNameException;
 
@@ -35,10 +34,9 @@ public final class JdbcKit
 
     final List<JdbcProbeDescriptor> probes = new ArrayList<>();
 
-    final JsonArray queryArray = config.containsKey( "probes" ) ? config.getJsonArray( "probes" ) : null;
-    if ( null != queryArray )
+    if ( config.containsKey( "probes" ) )
     {
-      for ( final Object queryConfig : queryArray )
+      for ( final Object queryConfig : config.getJsonArray( "probes" ) )
       {
         probes.add( parseQuery( (JsonObject) queryConfig ) );
       }
