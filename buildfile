@@ -8,7 +8,6 @@ define 'spydle' do
   compile.options.lint = 'all'
 
   compile.with :javax_jsr305,
-               :joda_time,
                :getopt4j,
                :javax_json
 
